@@ -41,6 +41,7 @@ class EditDevWindow extends Component {
                 </ModalHeader>
                 <ModalBody className={custCss.modalBody} >
                     <Select optionList={optionList} isAsync selected={8} />
+                    <Select optionList={optionList} isAsync selected={3} disabled />
                 </ModalBody>
                 <ModalFooter>
                     <Button onClick={this.handleClose}>Close</Button>

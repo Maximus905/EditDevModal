@@ -38,7 +38,7 @@ class Select extends PureComponent {
     }
 
     async updateIfNeeded() {
-        if (!this.state.optionsInvalidate || this.state.isLoading) return
+        if (!this.state.optionsInvalidate || this.state.isLoading || this.props.disabled) return
 
         const {isAsync, filter} = this.props
         if (this.filterShouldUpdate()) {
@@ -114,6 +114,7 @@ class Select extends PureComponent {
                         componentClass="select"
                         placeholder="select item"
                         value={this.state.selected}
+                        disabled={this.props.disabled}
                     >
                         {optionList}
                     </FormControl>
@@ -153,6 +154,7 @@ Select.propTypes = {
             title: PropTypes.string
         }
     )),
+    disabled: PropTypes.bool,
     placeHolder: PropTypes.string,
     selected: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     isAsync: PropTypes.bool,
