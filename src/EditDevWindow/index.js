@@ -32,7 +32,7 @@ class EditDevWindow extends Component {
         const optionList = [
             {value: 1, title: 't1'},
             {value: 3, title: 't3'},
-            {value: 4, title: 't3'},
+            {value: 4, title: 't4'},
         ]
         return (
             <Modal show={this.state.show} onHide={this.handleClose} bsSize="large" >
