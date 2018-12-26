@@ -36,7 +36,7 @@
     selector: false,
     template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>',
     trigger: 'hover focus',
-    title: '',
+    label: '',
     delay: 0,
     html: false,
     container: false,
@@ -344,8 +344,8 @@
 
   Tooltip.prototype.fixTitle = function () {
     var $e = this.$element
-    if ($e.attr('title') || typeof $e.attr('data-original-title') != 'string') {
-      $e.attr('data-original-title', $e.attr('title') || '').attr('title', '')
+    if ($e.attr('title') || typeof $e.attr('data-original-label') != 'string') {
+      $e.attr('data-original-label', $e.attr('title') || '').attr('title', '')
     }
   }
 
@@ -415,8 +415,8 @@
     var $e = this.$element
     var o  = this.options
 
-    title = $e.attr('data-original-title')
-      || (typeof o.title == 'function' ? o.title.call($e[0]) :  o.title)
+    title = $e.attr('data-original-label')
+      || (typeof o.label == 'function' ? o.label.call($e[0]) :  o.label)
 
     return title
   }

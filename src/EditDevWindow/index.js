@@ -3,8 +3,8 @@ import React, {Component} from 'react'
 // import './style.module.css'
 import custCss from './style.module.css'
 import {Button, Modal, ModalBody, ModalFooter, ModalHeader} from 'react-bootstrap'
-import Select from '../components/Select'
-
+import Office from '../components/Office'
+import Region from '../components/Region'
 
 class EditDevWindow extends Component {
     constructor(props, context) {
@@ -29,19 +29,14 @@ class EditDevWindow extends Component {
     }
 
     render() {
-        const optionList = [
-            {value: 1, title: 't1'},
-            {value: 3, title: 't3'},
-            {value: 4, title: 't4'},
-        ]
         return (
             <Modal show={this.state.show} onHide={this.handleClose} bsSize="large" >
                 <ModalHeader closeButton>
                     <Modal.Title>Modal heading. Device ID: {this.state.devId} </Modal.Title>
                 </ModalHeader>
                 <ModalBody className={custCss.modalBody} >
-                    <Select optionList={optionList} isAsync selected={8} />
-                    <Select optionList={optionList} isAsync selected={3} disabled />
+                    <Region/>
+                    <Office/>
                 </ModalBody>
                 <ModalFooter>
                     <Button onClick={this.handleClose}>Close</Button>
@@ -49,7 +44,7 @@ class EditDevWindow extends Component {
             </Modal>
         )
     }
-    componentDidMount() {
+    async componentDidMount() {
         window.openEditModal = (id) => {
             this.setState({
                 show: true,

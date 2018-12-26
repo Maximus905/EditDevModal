@@ -2,12 +2,12 @@ import React, { PureComponent, Fragment} from 'react'
 import PropTypes from 'prop-types'
 import {FormControl, ControlLabel, FormGroup} from 'react-bootstrap'
 import check from 'check-types'
+import axios from "axios"
 
 class Select extends PureComponent {
 
     state = {
         selected: check.number ? this.props.selected.toString() : this.props.selected,
-        // selected: this.props.selected,
         isLoading: false,
         optionList: [],
         optionsInvalidate: true,
@@ -53,17 +53,27 @@ class Select extends PureComponent {
             updatedList = this.updateLocalOptionList()
         }
         const selected = this.validateSelectedValue(updatedList) ? this.state.selected : ''
+        // const selected = ''
         this.setState({isLoading: false, optionsInvalidate: false, optionList: updatedList, selected})
     }
 
     async updateRemoteOptionList() {
-        //    for test only
-        function timeout(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms))
+        const {getRemoteData} = this.props
+        try {
+            const data = await getRemoteData()
+            return check.array(data) ? data : []
+        } catch (error) {
+            console.log('error in Select: ', error)
         }
 
-        await timeout(3000)
-        return this.props.optionList
+        const {remoteSourceUrl} = this.props
+        try {
+            const {data} = await axios.post(remoteSourceUrl)
+            console.log(data)
+            return []
+        } catch (error) {
+            console.log('error: ', error)
+        }
     }
 
     updateLocalOptionList() {
@@ -84,8 +94,8 @@ class Select extends PureComponent {
         if (optionsInvalidate) return []
 
         return optionList.map(
-            ({value, title}, key) => {
-                return <option value={value} key={key}>{title}</option>
+            ({value, label}, key) => {
+                return <option value={value} key={key}>{label}</option>
             }
         )
     }
@@ -105,10 +115,11 @@ class Select extends PureComponent {
             }
         })()
 
+        const controlLabel = check.not.emptyString(this.props.label) ? <ControlLabel>{this.props.label}</ControlLabel> : null
         return (
             <Fragment>
-                <FormGroup controlId="formControlsSelect">
-                    <ControlLabel>Select</ControlLabel>
+                <FormGroup controlId={this.props.controlId}>
+                    {controlLabel}
                     <FormControl
                         onChange={this.handleChange}
                         componentClass="select"
@@ -124,7 +135,7 @@ class Select extends PureComponent {
     }
     async componentDidMount() {
         console.log('didMounted')
-        await this.updateIfNeeded()
+        // await this.updateIfNeeded()
     }
     async componentDidUpdate() {
         console.log('didUpdated')
@@ -144,22 +155,23 @@ Select.propTypes = {
         PropTypes.string
     ]),
     controlId: PropTypes.string,
-    //initial optionList
+    //local option list if isAsync = false
     optionList: PropTypes.arrayOf(PropTypes.shape(
         {
             value: PropTypes.oneOfType([
                 PropTypes.number,
                 PropTypes.string
             ]),
-            title: PropTypes.string
+            label: PropTypes.string
         }
     )),
     disabled: PropTypes.bool,
+    label: PropTypes.string,
     placeHolder: PropTypes.string,
     selected: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     isAsync: PropTypes.bool,
     remoteSourceUrl: PropTypes.string,
-    remoteOptionList: PropTypes.func,
+    getRemoteData: PropTypes.func,
     onChange: PropTypes.oneOfType([
         PropTypes.func,
         PropTypes.arrayOf(PropTypes.func)
@@ -179,7 +191,8 @@ Select.defaultProps = {
     subscribers: [],
     selected: '',
     placeHolder: 'Select',
-    filter: {}
+    filter: {},
+    getRemoteData: () => {}
 }
 
 export default Select
