@@ -101,19 +101,30 @@ class Select extends PureComponent {
     }
 
     render() {
-        const optionList = (() => {
-            const {selected, isLoading} = this.state
-            const {placeHolder} = this.props
-            if (isLoading) {
-                return <option value={null}>Loading...</option>
-            } else {
-                const list = this.buildOptionList()
-                if (check.emptyString(selected)) {
-                    list.unshift(<option value={selected} key={list.length}>{placeHolder}</option>)
-                }
-                return list
+        let optionList = []
+        const {selected, isLoading} = this.state
+        const {placeHolder} = this.props
+        if (isLoading) {
+            optionList = <option value={null}>Loading...</option>
+        } else {
+            optionList = this.buildOptionList()
+            if (check.emptyString(selected) && optionList.length > 1) {
+                optionList.unshift(<option value={selected} key={optionList.length}>{placeHolder}</option>)
             }
-        })()
+        }
+        // const optionList = (() => {
+        //     const {selected, isLoading} = this.state
+        //     const {placeHolder} = this.props
+        //     if (isLoading) {
+        //         return <option value={null}>Loading...</option>
+        //     } else {
+        //         const list = this.buildOptionList()
+        //         if (check.emptyString(selected)) {
+        //             list.unshift(<option value={selected} key={list.length}>{placeHolder}</option>)
+        //         }
+        //         return list
+        //     }
+        // })()
 
         const controlLabel = check.not.emptyString(this.props.label) ? <ControlLabel>{this.props.label}</ControlLabel> : null
         return (
