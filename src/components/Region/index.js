@@ -1,42 +1,24 @@
-import React from 'react'
+import React, {PureComponent} from 'react'
 import PropTypes from 'prop-types'
 import Select from '../Select'
-import axios from 'axios'
-import check from 'check-types'
+import RemoteDataProvider from '../RemoteDataProvider'
 
-const Region = props => {
-    const {remoteSourceUrl, label, controlId, placeHolder, filter={'filter2': 'test'}} = props
-    let {selected} = props
-    const updateOptionList = async () => {
-        // return []
-        console.log('filter: ', filter)
-        try {
-            const {data: {rc}} = await axios.post(remoteSourceUrl, filter)
-            console.log('office data',rc)
-            return rc.map(item => {
-                return check.emptyString(item.value) ? {value: 'empty', label: '<Нет>'} : item
-            })
-        } catch (error) {
-            console.log('error: ', error)
-            selected = 'fetchDataError'
-            return [{
-                value: 'fetchDataError',
-                label: 'Ошибка запроса данных'
-            }]
-        }
+const URL = 'http://netcmdb-loc.rs.ru:8082/api/getRegions.json'
+
+class Region extends PureComponent {
+
+    optionListUpdater = RemoteDataProvider(URL)
+    render() {
+        console.log('Office render')
+        return <Select {...this.props} isAsync remoteDataFetch={this.optionListUpdater} />
     }
-    return (
-        <Select {...props} label={label} controlId={controlId} selected={selected} placeHolder={placeHolder} isAsync getRemoteData={updateOptionList} />
-    )
 }
 
 Region.propTypes = {
     controlId: PropTypes.string,
     disabled: PropTypes.bool,
     label: PropTypes.string,
-    placeHolder: PropTypes.string,
     selected: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    remoteSourceUrl: PropTypes.string,
     onChange: PropTypes.oneOfType([
         PropTypes.func,
         PropTypes.arrayOf(PropTypes.func)
@@ -52,10 +34,12 @@ Region.propTypes = {
 }
 Region.defaultProps = {
     label: 'Регион',
-    controlId: 'regCenterSelector',
-    remoteSourceUrl: 'http://netcmdb-loc.rs.ru:8082/api/getRegions.json',
-    placeHolder: 'Select region',
-    selected: ''
+    controlId: 'regionSelector',
+    selected: '',
+    filter: {
+        accessor: 'region_id',
+        statement: '=',
+        value: ''
+    }
 }
-
 export default Region

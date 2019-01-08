@@ -7,22 +7,22 @@ import axios from "axios"
 class Select extends PureComponent {
 
     state = {
-        selected: check.number ? this.props.selected.toString() : this.props.selected,
+        selected: check.number(this.props.selected) ? this.props.selected.toString() : this.props.selected,
         isLoading: false,
-        optionList: [],
         optionsInvalidate: true,
     }
+    optionList = []
 
     filter = {}
 
     handleChange = (e) => {
-        console.log(('change select'))
+        console.log(('handleChange in Select'))
         this.setState({selected: e.target.value})
     }
 
 
     invokeListeners = () => {
-        console.log('invoke', this.state.selected)
+        console.log('invoke listeners', this.state.selected, this.filter)
         let {onChange} = this.props
         if (check.function(onChange)) {
             onChange = [onChange]
@@ -33,17 +33,22 @@ class Select extends PureComponent {
         }
     }
 
-    filterShouldUpdate() {
+    filterIsChanged() {
         return JSON.stringify(this.filter) !== JSON.stringify(this.props.filter)
     }
 
     async updateIfNeeded() {
-        if (!this.state.optionsInvalidate || this.state.isLoading || this.props.disabled) return
 
         const {isAsync, filter} = this.props
-        if (this.filterShouldUpdate()) {
+        if (this.filterIsChanged()) {
             this.filter = filter
+            console.log('filter is changed', filter)
+            this.setState({optionsInvalidate: true})
         }
+
+        if (this.state.isLoading || this.props.disabled) return
+        if (!this.state.optionsInvalidate) return
+        console.log('remote list will be updated')
         let updatedList
         if (isAsync) {
             this.setState({isLoading: true})
@@ -58,27 +63,31 @@ class Select extends PureComponent {
     }
 
     async updateRemoteOptionList() {
-        const {getRemoteData} = this.props
+        const {remoteDataFetch = this.remoteDataFetchDefault} = this.props
         try {
-            const data = await getRemoteData()
+            const data = await remoteDataFetch(this.filter)
             return check.array(data) ? data : []
         } catch (error) {
             console.log('error in Select: ', error)
         }
 
-        const {remoteSourceUrl} = this.props
+
+    }
+    updateLocalOptionList() {
+        return this.props.optionList
+    }
+
+    async remoteDataFetchDefault() {
+        const {remoteSourceUrl, filter={}} = this.props
         try {
-            const {data} = await axios.post(remoteSourceUrl)
-            console.log(data)
-            return []
+            const {data} = await axios.post(remoteSourceUrl, filter)
+            console.log('fetched data: ',data)
+            return check.array(data) ? data : []
         } catch (error) {
             console.log('error: ', error)
         }
     }
 
-    updateLocalOptionList() {
-        return this.props.optionList
-    }
 
     validateSelectedValue(optionList) {
         const {selected} = this.state
@@ -89,42 +98,21 @@ class Select extends PureComponent {
     }
 
     buildOptionList = () => {
-        const {optionsInvalidate, optionList} = this.state
+        const {isLoading, optionList} = this.state
+        if (isLoading) return <option value={null}>Loading...</option>
 
-        if (optionsInvalidate) return []
-
-        return optionList.map(
+        const emptyOption = <option value={this.props.emptyValue} key='empty'>{this.props.emptyLabel}</option>
+        const optionsSet = optionList.map(
             ({value, label}, key) => {
                 return <option value={value} key={key}>{label}</option>
-            }
-        )
+            })
+        return [emptyOption, ...optionsSet]
     }
 
+
     render() {
-        let optionList = []
-        const {selected, isLoading} = this.state
-        const {placeHolder} = this.props
-        if (isLoading) {
-            optionList = <option value={null}>Loading...</option>
-        } else {
-            optionList = this.buildOptionList()
-            if (check.emptyString(selected) && optionList.length > 1) {
-                optionList.unshift(<option value={selected} key={optionList.length}>{placeHolder}</option>)
-            }
-        }
-        // const optionList = (() => {
-        //     const {selected, isLoading} = this.state
-        //     const {placeHolder} = this.props
-        //     if (isLoading) {
-        //         return <option value={null}>Loading...</option>
-        //     } else {
-        //         const list = this.buildOptionList()
-        //         if (check.emptyString(selected)) {
-        //             list.unshift(<option value={selected} key={list.length}>{placeHolder}</option>)
-        //         }
-        //         return list
-        //     }
-        // })()
+        console.log('Select render')
+        const {selected} = this.state
 
         const controlLabel = check.not.emptyString(this.props.label) ? <ControlLabel>{this.props.label}</ControlLabel> : null
         return (
@@ -135,21 +123,24 @@ class Select extends PureComponent {
                         onChange={this.handleChange}
                         componentClass="select"
                         placeholder="select item"
-                        value={this.state.selected}
+                        value={selected}
                         disabled={this.props.disabled}
                     >
-                        {optionList}
+                        {this.buildOptionList()}
                     </FormControl>
                 </FormGroup>
             </Fragment>
         );
     }
+    static getDerivedStateFromProps(props, state) {
+
+    }
     async componentDidMount() {
-        console.log('didMounted')
-        // await this.updateIfNeeded()
+        console.log('didMounted', this.state)
+        await this.updateIfNeeded()
     }
     async componentDidUpdate() {
-        console.log('didUpdated')
+        console.log('didUpdated Select')
         await this.updateIfNeeded()
         this.invokeListeners()
     }
@@ -178,11 +169,12 @@ Select.propTypes = {
     )),
     disabled: PropTypes.bool,
     label: PropTypes.string,
-    placeHolder: PropTypes.string,
+    emptyValue: PropTypes.string,
+    emptyLabel: PropTypes.string,
     selected: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     isAsync: PropTypes.bool,
     remoteSourceUrl: PropTypes.string,
-    getRemoteData: PropTypes.func,
+    remoteDataFetch: PropTypes.func,
     onChange: PropTypes.oneOfType([
         PropTypes.func,
         PropTypes.arrayOf(PropTypes.func)
@@ -200,10 +192,10 @@ Select.defaultProps = {
     optionList: [],
     isAsync: false,
     subscribers: [],
-    selected: '',
-    placeHolder: 'Select',
+    emptyValue: '',
+    emptyLabel: '<Не выбрано>',
     filter: {},
-    getRemoteData: () => {}
+    selected: ''
 }
 
 export default Select
