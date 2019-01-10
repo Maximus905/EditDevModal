@@ -8,12 +8,12 @@ class Select extends PureComponent {
 
     state = {
         selected: check.number(this.props.selected) ? this.props.selected.toString() : this.props.selected,
+        propsSelected: '',
         isLoading: false,
         optionsInvalidate: true,
+        filter: {}
     }
     optionList = []
-
-    filter = {}
 
     handleChange = (e) => {
         console.log(('handleChange in Select'))
@@ -33,33 +33,23 @@ class Select extends PureComponent {
         }
     }
 
-    filterIsChanged() {
-        return JSON.stringify(this.filter) !== JSON.stringify(this.props.filter)
-    }
-
     async updateIfNeeded() {
 
-        const {isAsync, filter} = this.props
-        if (this.filterIsChanged()) {
-            this.filter = filter
-            console.log('filter is changed', filter)
-            this.setState({optionsInvalidate: true})
-        }
+        const {isAsync, disabled} = this.props
+        const {isLoading, optionsInvalidate} = this.state
 
-        if (this.state.isLoading || this.props.disabled) return
-        if (!this.state.optionsInvalidate) return
-        console.log('remote list will be updated')
-        let updatedList
+        if (isLoading || disabled) return
+        if (!optionsInvalidate) return
+
+        console.log('options list will be updated remotely')
         if (isAsync) {
             this.setState({isLoading: true})
-            updatedList = await this.updateRemoteOptionList()
+            this.optionList = await this.updateRemoteOptionList()
             console.log('remote list is updated')
         } else {
-            updatedList = this.updateLocalOptionList()
+            this.optionList = this.updateLocalOptionList()
         }
-        const selected = this.validateSelectedValue(updatedList) ? this.state.selected : ''
-        // const selected = ''
-        this.setState({isLoading: false, optionsInvalidate: false, optionList: updatedList, selected})
+        this.setState({isLoading: false, optionsInvalidate: false})
     }
 
     async updateRemoteOptionList() {
@@ -89,7 +79,7 @@ class Select extends PureComponent {
     }
 
 
-    validateSelectedValue(optionList) {
+    checkSelectedValue(optionList) {
         const {selected} = this.state
         const filtered = optionList.filter((item) => {
             return item.value.toString() === selected
@@ -98,11 +88,11 @@ class Select extends PureComponent {
     }
 
     buildOptionList = () => {
-        const {isLoading, optionList} = this.state
+        const {isLoading} = this.state
         if (isLoading) return <option value={null}>Loading...</option>
 
         const emptyOption = <option value={this.props.emptyValue} key='empty'>{this.props.emptyLabel}</option>
-        const optionsSet = optionList.map(
+        const optionsSet = this.optionList.map(
             ({value, label}, key) => {
                 return <option value={value} key={key}>{label}</option>
             })
@@ -133,7 +123,26 @@ class Select extends PureComponent {
         );
     }
     static getDerivedStateFromProps(props, state) {
+        console.log('getDerivedStateFromProps in Select')
+        let propsSelected = check.number(props.selected) ? props.selected.toString() : props.selected
+        let newState = {}
+        if (JSON.stringify(state.filter) !== JSON.stringify(props.filter)) {
+            newState = Object.assign(newState, {
+                filter: props.filter,
+                optionsInvalidate: true
+            })
+        }
 
+        if (check.not.emptyString(propsSelected) && propsSelected !== state.propsSelected) {
+            newState = Object.assign(newState, {
+                propsSelected: propsSelected,
+                selected: propsSelected !== state.selected ? propsSelected : state.selected
+            })
+        }
+        if (check.nonEmptyObject(newState)) {
+            return newState
+        }
+        return null
     }
     async componentDidMount() {
         console.log('didMounted', this.state)
@@ -191,7 +200,7 @@ Select.propTypes = {
 Select.defaultProps = {
     optionList: [],
     isAsync: false,
-    subscribers: [],
+    onChange: [],
     emptyValue: '',
     emptyLabel: '<Не выбрано>',
     filter: {},

@@ -1,7 +1,7 @@
 import React, {PureComponent} from 'react'
 import PropTypes from 'prop-types'
-import Select from '../Select'
-import RemoteDataProvider from '../RemoteDataProvider'
+import Select from '../Base/Select'
+import RemoteDataProvider from '../Base/RemoteDataProvider'
 
 const URL = 'http://netcmdb-loc.rs.ru:8082/api/getRegions.json'
 
@@ -9,7 +9,7 @@ class Region extends PureComponent {
 
     optionListUpdater = RemoteDataProvider(URL)
     render() {
-        console.log('Office render')
+        console.log('Region render')
         return <Select {...this.props} isAsync remoteDataFetch={this.optionListUpdater} />
     }
 }

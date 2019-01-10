@@ -1,7 +1,7 @@
 import React, {PureComponent} from 'react'
 import PropTypes from 'prop-types'
-import Select from '../Select'
-import RemoteDataProvider from '../RemoteDataProvider'
+import Select from '../Base/Select'
+import RemoteDataProvider from '../Base/RemoteDataProvider'
 
 const URL = 'http://netcmdb-loc.rs.ru:8082/api/getCities.json'
 

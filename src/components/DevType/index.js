@@ -3,19 +3,19 @@ import PropTypes from 'prop-types'
 import Select from '../Base/Select'
 import RemoteDataProvider from '../Base/RemoteDataProvider'
 
-const URL = 'http://netcmdb-loc.rs.ru:8082/api/getOffices.json'
+const URL = 'http://netcmdb-loc.rs.ru:8082/api/getDevTypes.json'
 
-class Office extends PureComponent {
+class DevType extends PureComponent {
 
     updateOptionList = RemoteDataProvider(URL)
     render() {
-        console.log('Office render')
+        console.log('DevType render')
         return <Select {...this.props} isAsync remoteDataFetch={this.updateOptionList} />
     }
 }
 
 
-Office.propTypes = {
+DevType.propTypes = {
     controlId: PropTypes.string,
     disabled: PropTypes.bool,
     label: PropTypes.string,
@@ -33,15 +33,15 @@ Office.propTypes = {
         ])
     })
 }
-Office.defaultProps = {
-    label: 'Офис',
-    controlId: 'officeSelector',
+DevType.defaultProps = {
+    label: 'Тип(роль)',
+    controlId: 'devTypeSelector',
     selected: '',
     filter: {
-        accessor: 'city_id',
+        accessor: '',
         statement: '',
         value: ''
     }
 }
 
-export default Office
+export default DevType
