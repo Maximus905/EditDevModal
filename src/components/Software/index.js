@@ -18,7 +18,7 @@ Software.propTypes = {
     controlId: PropTypes.string,
     disabled: PropTypes.bool,
     label: PropTypes.string,
-    selected: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    defaultSelected: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     onChange: PropTypes.oneOfType([
         PropTypes.func,
         PropTypes.arrayOf(PropTypes.func)
@@ -35,7 +35,6 @@ Software.propTypes = {
 Software.defaultProps = {
     label: 'ПО',
     controlId: 'softwareSelector',
-    selected: '',
     filter: {
         accessor: '',
         statement: '',

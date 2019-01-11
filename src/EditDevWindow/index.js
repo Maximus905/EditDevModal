@@ -142,11 +142,13 @@ class EditDevWindow extends Component {
     }
     onChangeDevType = ({selected}) => {
         console.log('onChangeDevType: ', selected)
-        this.setState({devType_id: selected})
+        const {devInfo} = this.state
+        this.setState({devInfo: Object.assign({}, devInfo, {devType_id: selected})})
     }
     onChangeSoftware = ({selected}) => {
         console.log('onChangeDevType: ', selected)
-        this.setState({software_id: selected})
+        const {devInfo} = this.state
+        this.setState({devInfo: Object.assign({}, devInfo, {software_id: selected})})
     }
     onChangeSoftwareVer = ({value}) => {
         console.log('onChangeDevType: ', value)
@@ -171,7 +173,8 @@ class EditDevWindow extends Component {
         this.setState({deviceComment: value})
     }
     onChangeDevInUse = (e) => {
-        this.setState({devInUse: e.target.checked})
+        const {devInfo} = this.state
+        this.setState({devInfo: Object.assign({}, devInfo, {dev_in_use: e.target.checked})})
     }
 
     fetchDeviceData = async (id) => {
@@ -245,15 +248,16 @@ class EditDevWindow extends Component {
                 </ModalHeader>
                 <ModalBody className={custCss.modalBody} >
                     <Row>
-                        <Col md={4}><Region onChange={this.onChangeRegion} selected={this.state.locationInfo.region_id}/></Col>
-                        <Col md={4}><City onChange={this.onChangeCity} selected={this.state.locationInfo.city_id} filter={this.cityFilter}/></Col>
-                        <Col md={4}><Office onChange={this.onChangeOffice}/></Col>
+                        <Col md={2}><Region onChange={this.onChangeRegion} selected={this.state.locationInfo.region_id}/></Col>
+                        <Col md={2}><City onChange={this.onChangeCity} selected={this.state.locationInfo.city_id} filter={this.cityFilter}/></Col>
+                        <Col md={4}><Office onChange={this.onChangeOffice} defaultSelected={devInfo.location_id} /></Col>
+                        <Col md={4}><TextArea controlId="officeComment" onChange={this.onChangeOfficeComment} placeholder='Комментарий к офису' defaultValue='' label="Комментарий к оффису" /></Col>
                     </Row>
                     <Row>
-                        <Col md={3}><DevType onChange={this.onChangeDevType} /></Col>
-                        <Col md={3}><Platform /></Col>
-                        <Col md={3}><Software onChange={this.onChangeSoftware} /></Col>
-                        <Col md={3}><Input controlId='swVer' onChange={this.onChangeSoftwareVer} defaultValue='по версия' label="Версия ПО"/></Col>
+                        <Col md={3}><DevType onChange={this.onChangeDevType} defaultSelected={devInfo.dev_type_id} /></Col>
+                        <Col md={3}><Platform defaultSelected={devInfo.platform_id}/></Col>
+                        <Col md={3}><Software onChange={this.onChangeSoftware}  defaultSelected={devInfo.software_id} /></Col>
+                        <Col md={3}><Input controlId='swVer' onChange={this.onChangeSoftwareVer} defaultValue={devInfo.software_ver} label="Версия ПО"/></Col>
                     </Row>
                     <Row>
                         <Col md={3}><Input controlId='devSn' addOnPosition="left" addOnText="SN" onChange={this.onChangeSn} defaultValue={devInfo.platform_sn} label=" " disabled/></Col>
@@ -262,10 +266,10 @@ class EditDevWindow extends Component {
                         <Col md={3}><Input controlId='managementIP' addOnPosition="left" addOnText="management IP" onChange={this.onChangeMngIp} label=" " defaultValue={mngIp} /></Col>
                     </Row>
                     <Row>
-                        <Col md={6}><TextArea controlId="officeComment" onChange={this.onChangeOfficeComment} defaultValue='officeComment' label="Комментарий к оффису" /></Col>
-                        <Col md={6}><TextArea controlId="deviceComment" onChange={this.onChangeDeviceComment} defaultValue='deviceComment' label="Коментарий к устройству" /></Col>
+
+                        <Col md={6}><TextArea controlId="deviceComment" onChange={this.onChangeDeviceComment} placeholder='Комментарий к устройству' defaultValue='' label="Коментарий к устройству" /></Col>
                     </Row>
-                    <Row><Col md={6}><Checkbox title="Устройство используется" onChange={this.onChangeDevInUse} checked={this.state.devInUse} >Устройство используется</Checkbox></Col></Row>
+                    <Row><Col md={6}><Checkbox title="Устройство используется" onChange={this.onChangeDevInUse} checked={this.state.devInfo.dev_in_use} >Устройство используется</Checkbox></Col></Row>
                     <Row>
                         <Col md={12}><Modules/></Col>
                     </Row>

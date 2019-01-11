@@ -19,7 +19,7 @@ Platform.propTypes = {
     controlId: PropTypes.string,
     disabled: PropTypes.bool,
     label: PropTypes.string,
-    selected: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    defaultSelected: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     onChange: PropTypes.oneOfType([
         PropTypes.func,
         PropTypes.arrayOf(PropTypes.func)
@@ -36,7 +36,6 @@ Platform.propTypes = {
 Platform.defaultProps = {
     label: 'Платформа',
     controlId: 'platformSelector',
-    selected: '',
     filter: {
         accessor: '',
         statement: '',

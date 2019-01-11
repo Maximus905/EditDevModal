@@ -19,7 +19,7 @@ Office.propTypes = {
     controlId: PropTypes.string,
     disabled: PropTypes.bool,
     label: PropTypes.string,
-    selected: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    defaultSelected: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     onChange: PropTypes.oneOfType([
         PropTypes.func,
         PropTypes.arrayOf(PropTypes.func)
@@ -36,7 +36,6 @@ Office.propTypes = {
 Office.defaultProps = {
     label: 'Офис',
     controlId: 'officeSelector',
-    selected: '',
     filter: {
         accessor: 'city_id',
         statement: '',

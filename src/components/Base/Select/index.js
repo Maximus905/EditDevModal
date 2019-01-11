@@ -7,13 +7,20 @@ import axios from "axios"
 class Select extends PureComponent {
 
     state = {
-        selected: check.number(this.props.selected) ? this.props.selected.toString() : this.props.selected,
-        propsSelected: '',
+        selected: '',
         isLoading: false,
         optionsInvalidate: true,
         filter: {}
     }
     optionList = []
+
+    setDefaultSelected = ((prevValue) => (value) => {
+        if (!value || this.state.optionsInvalidate || this.state.isLoading) return
+        if (prevValue === value.toString()) return
+        if (this.optionList.filter((item) => item.value === value).length === 0) return
+        prevValue = value.toString()
+        this.setState({selected: prevValue})
+    })('')
 
     handleChange = (e) => {
         console.log(('handleChange in Select'))
@@ -45,7 +52,7 @@ class Select extends PureComponent {
         if (isAsync) {
             this.setState({isLoading: true})
             this.optionList = await this.updateRemoteOptionList()
-            console.log('remote list is updated')
+            console.log('remote list is updated', this.optionList)
         } else {
             this.optionList = this.updateLocalOptionList()
         }
@@ -76,15 +83,6 @@ class Select extends PureComponent {
         } catch (error) {
             console.log('error: ', error)
         }
-    }
-
-
-    checkSelectedValue(optionList) {
-        const {selected} = this.state
-        const filtered = optionList.filter((item) => {
-            return item.value.toString() === selected
-        })
-        return filtered.length > 0
     }
 
     buildOptionList = () => {
@@ -124,33 +122,23 @@ class Select extends PureComponent {
     }
     static getDerivedStateFromProps(props, state) {
         console.log('getDerivedStateFromProps in Select')
-        let propsSelected = check.number(props.selected) ? props.selected.toString() : props.selected
-        let newState = {}
         if (JSON.stringify(state.filter) !== JSON.stringify(props.filter)) {
-            newState = Object.assign(newState, {
+            return {
                 filter: props.filter,
                 optionsInvalidate: true
-            })
-        }
-
-        if (check.not.emptyString(propsSelected) && propsSelected !== state.propsSelected) {
-            newState = Object.assign(newState, {
-                propsSelected: propsSelected,
-                selected: propsSelected !== state.selected ? propsSelected : state.selected
-            })
-        }
-        if (check.nonEmptyObject(newState)) {
-            return newState
+            }
         }
         return null
     }
     async componentDidMount() {
         console.log('didMounted', this.state)
         await this.updateIfNeeded()
+        this.setDefaultSelected(this.props.defaultSelected)
     }
     async componentDidUpdate() {
         console.log('didUpdated Select')
         await this.updateIfNeeded()
+        this.setDefaultSelected(this.props.defaultSelected)
         this.invokeListeners()
     }
 }
@@ -180,7 +168,7 @@ Select.propTypes = {
     label: PropTypes.string,
     emptyValue: PropTypes.string,
     emptyLabel: PropTypes.string,
-    selected: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    defaultSelected: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     isAsync: PropTypes.bool,
     remoteSourceUrl: PropTypes.string,
     remoteDataFetch: PropTypes.func,

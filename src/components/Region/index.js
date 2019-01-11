@@ -18,7 +18,7 @@ Region.propTypes = {
     controlId: PropTypes.string,
     disabled: PropTypes.bool,
     label: PropTypes.string,
-    selected: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    defaultSelected: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     onChange: PropTypes.oneOfType([
         PropTypes.func,
         PropTypes.arrayOf(PropTypes.func)
@@ -35,7 +35,6 @@ Region.propTypes = {
 Region.defaultProps = {
     label: 'Регион',
     controlId: 'regionSelector',
-    selected: '',
     filter: {
         accessor: 'region_id',
         statement: '=',
