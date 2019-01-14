@@ -11,7 +11,6 @@ class TextArea extends PureComponent {
         this.setState({value: e.target.value})
     }
     invokeListeners = () => {
-        console.log('invoke listeners', this.state.value)
         let {onChange} = this.props
         if (check.function(onChange)) {
             onChange = [onChange]
@@ -49,7 +48,7 @@ class TextArea extends PureComponent {
 
 TextArea.propTypes = {
     label: PropTypes.string,
-    defaultValue: PropTypes.oneOf([PropTypes.number, PropTypes.string]),
+    defaultValue: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     controlId: PropTypes.string,
     onChange: PropTypes.oneOfType([
         PropTypes.func,
@@ -60,7 +59,6 @@ TextArea.propTypes = {
     placeholder: PropTypes.string
 }
 TextArea.defaultProps = {
-
 }
 
 export default TextArea

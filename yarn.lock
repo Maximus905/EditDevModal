@@ -778,6 +778,10 @@
     "@svgr/core" "^2.4.1"
     loader-utils "^1.1.0"
 
+"@types/prop-types@^15.5.6":
+  version "15.5.8"
+  resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.5.8.tgz#8ae4e0ea205fe95c3901a5a1df7f66495e3a56ce"
+
 "@types/tapable@1.0.2":
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@types/tapable/-/tapable-1.0.2.tgz#e13182e1b69871a422d7863e11a4a6f5b814a4bd"
@@ -6848,6 +6852,13 @@ react-bootstrap@^0.32.4:
     react-transition-group "^2.0.0"
     uncontrollable "^5.0.0"
     warning "^3.0.0"
+
+react-contenteditable@^3.2.5:
+  version "3.2.5"
+  resolved "https://registry.yarnpkg.com/react-contenteditable/-/react-contenteditable-3.2.5.tgz#abdeae18a0677ae758a84c686bc3227b92b708e9"
+  dependencies:
+    "@types/prop-types" "^15.5.6"
+    fast-deep-equal "^2.0.1"
 
 react-dev-utils@^6.1.1:
   version "6.1.1"

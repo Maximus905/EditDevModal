@@ -9,7 +9,6 @@ class Office extends PureComponent {
 
     updateOptionList = RemoteDataProvider(URL)
     render() {
-        console.log('Office render')
         return <Select {...this.props} isAsync remoteDataFetch={this.updateOptionList} />
     }
 }

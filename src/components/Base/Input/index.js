@@ -20,7 +20,6 @@ class Input extends PureComponent {
     }
 
     invokeListeners = () => {
-        console.log('invoke listeners', this.state.value)
         let {onChange} = this.props
         if (check.function(onChange)) {
             onChange = [onChange]

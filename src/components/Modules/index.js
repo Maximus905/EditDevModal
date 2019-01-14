@@ -1,12 +1,35 @@
 import React, {Component} from 'react'
 import PropTypes from 'prop-types'
-import {Table, Button} from 'react-bootstrap'
+import check from 'check-types'
+import {Table} from 'react-bootstrap'
+import EditableTag from '../Base/EditableTag'
+import InUseButton from '../InUseButton'
 
 
 class Modules extends Component {
+
+    modulesSet = () => {
+        const {data} = this.props
+        if (check.not.array(data)) return
+        return data.map((module, index) => {
+            const button = <InUseButton defaultValue={module.module_in_use} onChange={this.props.onChangeInUseStatus(index)} />
+            console.log('inuse', module.module_in_use)
+            return (
+                <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td className={module.module_not_found ? 'bg-danger' : null}>{module.module}</td>
+                    <td>{module.module_item_sn}</td>
+                    <EditableTag disabled={false} tagName={'td'} defaultValue={module.module_item_comment} onChange={this.props.onChange(index)}/>
+                    <td align="center" valign="middle">{button}</td>
+                </tr>
+            )
+        })
+    }
+
     render() {
         return (
-            <Table responsive bordered striped condensed>
+
+            <Table responsive bordered striped condensed style={{"tableLayout": "fixed"}}  >
                 <thead>
                     <tr>
                         <th className="col-xs-1 text-center">#</th>
@@ -17,13 +40,7 @@ class Modules extends Component {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>#</td>
-                        <td>moduleName</td>
-                        <td>sn</td>
-                        <td>comment</td>
-                        <td align="middle"><Button bsStyle="success" bsSize="xsmall">not used</Button></td>
-                    </tr>
+                    {this.modulesSet()}
                 </tbody>
             </Table>
         )
@@ -32,16 +49,26 @@ class Modules extends Component {
 
 Modules.propTypes = {
     data: PropTypes.arrayOf(PropTypes.shape({
-        vendor: PropTypes.string,
         module: PropTypes.string,
-        sn: PropTypes.string,
-        comment: PropTypes.string,
-        inUse: PropTypes.bool
+        module_in_use: PropTypes.bool,
+        module_item_details: PropTypes.object,
+        module_item_comment: PropTypes.string,
+        module_item_id: PropTypes.number,
+        module_item_sn: PropTypes.string,
+        module_not_found: PropTypes.bool,
     })),
     onChange: PropTypes.oneOfType([
     PropTypes.func,
     PropTypes.arrayOf(PropTypes.func)
-]),
+    ]),
+    onChangeInUseStatus: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.arrayOf(PropTypes.func)
+    ]),
+
+}
+Modules.defaultProps = {
+    data: []
 }
 
 export default Modules

@@ -12,6 +12,7 @@ import Software from '../components/Software'
 import Input from '../components/Base/Input'
 import TextArea from '../components/Base/TextArea'
 import Modules from '../components/Modules'
+import Ports from '../components/Ports'
 // import RemoteDataProvider from "../components/Base/RemoteDataProvider"
 
 const DEV_DATA_URL = 'http://netcmdb-loc.rs.ru:8082/api/getDevData.json'
@@ -29,6 +30,15 @@ class EditDevWindow extends Component {
 
     }
     /**
+     * @typedef moduleInfo
+     * @type {Object}
+     * @property {string} module
+     * @property {number} module_item_id
+     * @property {Object} module_item_details
+     * @property {string} module_item_sn
+     * @property {boolean} module_in_use
+     * @property {boolean} module_not_found
+
      *
      * @type {object} state
      * @property {boolean} show
@@ -37,13 +47,14 @@ class EditDevWindow extends Component {
      * @property {boolean} devDataReady
      * @property {object} locationInfo
      * @property {object} devInfo
-     * @property {object} modulesInfo
-     * @property {object} portsInfo
+     * @property {Array.<moduleInfo>} modulesInfo
+     * @property {Array} portsInfo
      *
      */
     state = {
         show: true,
-        devId: 11800,
+        // devId: 12137,
+        devId: 1506,
         // devDataLoading: false,
         devDataReady: false,
         /**
@@ -62,11 +73,7 @@ class EditDevWindow extends Component {
          * 'software_details'}} devInfo
          */
         devInfo: {},
-        /**
-         * @type {{'module' ,'module_item_id', 'module_item_details',
-         * 'module_item_sn', 'module_in_use', 'module_not_found'}}
-         */
-        modulesInfo: {},
+        modulesInfo: [],
         /**
          * @type {{'port_id', 'port_ip', 'port_comment',
          * 'port_details', 'port_is_mng', 'port_mac', 'port_mask_len'}}
@@ -95,9 +102,9 @@ class EditDevWindow extends Component {
         devInfo: {},
         /**
          * @type {{'module' ,'module_item_id', 'module_item_details',
-         * 'module_item_sn', 'module_in_use', 'module_not_found'}}
+         * 'module_item_comment', 'module_item_sn', 'module_in_use', 'module_not_found'}}
          */
-        modulesInfo: {},
+        modulesInfo: [],
         /**
          * @type {{'port_id', 'port_ip', 'port_comment',
          * 'port_details', 'port_is_mng', 'port_mac', 'port_mask_len'}}
@@ -126,32 +133,26 @@ class EditDevWindow extends Component {
     }
 
     onChangeRegion = ({selected}) => {
-        console.log('onChangeRegion: ', selected)
         const {locationInfo} = this.state
         this.setState({locationInfo: Object.assign({}, locationInfo, {region_id: selected})})
     }
     onChangeCity = ({selected}) => {
-        console.log('onChangeCity: ', selected)
         const {locationInfo} = this.state
         this.setState({locationInfo: Object.assign({}, locationInfo, {city_id: selected})})
     }
     onChangeOffice = ({selected}) => {
-        console.log('onChangeOffice: ', selected)
         const {locationInfo} = this.state
         this.setState({locationInfo: Object.assign({}, locationInfo, {office_id: selected})})
     }
     onChangeDevType = ({selected}) => {
-        console.log('onChangeDevType: ', selected)
         const {devInfo} = this.state
         this.setState({devInfo: Object.assign({}, devInfo, {devType_id: selected})})
     }
     onChangeSoftware = ({selected}) => {
-        console.log('onChangeDevType: ', selected)
         const {devInfo} = this.state
         this.setState({devInfo: Object.assign({}, devInfo, {software_id: selected})})
     }
     onChangeSoftwareVer = ({value}) => {
-        console.log('onChangeDevType: ', value)
         this.setState({softwareVer: value})
     }
     onChangeSn = ({value}) => {
@@ -176,6 +177,22 @@ class EditDevWindow extends Component {
         const {devInfo} = this.state
         this.setState({devInfo: Object.assign({}, devInfo, {dev_in_use: e.target.checked})})
     }
+    onChangeModuleComment = (idx) => ({value}) => {
+        const {modulesInfo} = this.state
+        if (modulesInfo[idx] && modulesInfo[idx].module_item_comment !== value) {
+            modulesInfo[idx].module_item_comment = value
+            this.setState({modulesInfo})
+        }
+
+    }
+    onChangeModuleInUseStatus = (idx) => ({value}) => {
+        const {modulesInfo} = this.state
+        if (modulesInfo[idx] && modulesInfo[idx].module_in_use !== value) {
+            modulesInfo[idx].module_in_use = value
+            this.setState({modulesInfo})
+        }
+
+    }
 
     fetchDeviceData = async (id) => {
         try {
@@ -199,7 +216,6 @@ class EditDevWindow extends Component {
                 params: {id}
             })
             const {data} = res
-            // console.log('modData:', modData)
             if (!data.modulesInfo) {
                 console.log('ERROR: fetchDevModulesData')
                 return []
@@ -228,13 +244,13 @@ class EditDevWindow extends Component {
     }
 
     memoizedCityFilter = ((prevFilter) => () => {
-        console.log(prevFilter.region_id === this.state.region_id ? 'old_city_filter' : 'new_city_filter')
+        // console.log(prevFilter.region_id === this.state.region_id ? 'old_city_filter' : 'new_city_filter')
         if (prevFilter.region_id !== this.state.region_id) prevFilter = Object.assign({}, this.cityFilter, {region_id: this.state.region_id})
         return prevFilter
     })('')
 
     memoizedOfficeFilter = ((prevFilter) => () => {
-        console.log(prevFilter.city_id === this.state.city_id ? 'old_city_filter' : 'new_city_filter')
+        // console.log(prevFilter.city_id === this.state.city_id ? 'old_city_filter' : 'new_city_filter')
         if (prevFilter.city_id !== this.state.city_id) prevFilter = Object.assign({}, this.officeFilter, {city_id: this.state.city_id})
         return prevFilter
     })('')
@@ -267,11 +283,12 @@ class EditDevWindow extends Component {
                     </Row>
                     <Row>
 
-                        <Col md={6}><TextArea controlId="deviceComment" onChange={this.onChangeDeviceComment} placeholder='Комментарий к устройству' defaultValue='' label="Коментарий к устройству" /></Col>
+                        <Col md={6}><TextArea controlId="deviceComment" onChange={this.onChangeDeviceComment} placeholder='Комментарий к устройству' defaultValue={devInfo.dev_comment} label="Коментарий к устройству" /></Col>
                     </Row>
-                    <Row><Col md={6}><Checkbox title="Устройство используется" onChange={this.onChangeDevInUse} checked={this.state.devInfo.dev_in_use} >Устройство используется</Checkbox></Col></Row>
+                    <Row><Col md={6}><Checkbox title="Устройство используется" onChange={this.onChangeDevInUse} checked={this.state.devInfo.dev_in_use || true} >Устройство используется</Checkbox></Col></Row>
                     <Row>
-                        <Col md={12}><Modules/></Col>
+                        <Col md={10}><Modules data={modulesInfo} onChange={this.onChangeModuleComment} onChangeInUseStatus={this.onChangeModuleInUseStatus} /></Col>
+                        <Col md={12}><Ports data={portsInfo} /></Col>
                     </Row>
                 </ModalBody>
                 <ModalFooter>
@@ -294,7 +311,6 @@ class EditDevWindow extends Component {
     async componentDidUpdate() {
         const {devId, devDataReady, devDataLoading} = this.state
         if (devId && !devDataReady && !devDataLoading) {
-            console.log('loading dev data')
             const {devId} = this.state
             this.setState({devDataLoading: true})
             // const devData = await this.fetchDeviceData(this.state.devId)
@@ -304,9 +320,7 @@ class EditDevWindow extends Component {
                 this.fetchDevPortsData(devId)
             ])
             const [{devInfo}, {modulesInfo}, {portsInfo}] = response
-            console.log('devData:',devInfo, modulesInfo, portsInfo)
             this.initialData = {devInfo, modulesInfo, portsInfo, mngIp: this.managementIp(portsInfo)}
-            console.log('22222', this.initialData)
             this.setState(Object.assign({}, {devDataLoading: false, devDataReady: true}, {devInfo, modulesInfo, portsInfo}))
         }
     }

@@ -9,7 +9,6 @@ class DevType extends PureComponent {
 
     updateOptionList = RemoteDataProvider(URL)
     render() {
-        console.log('DevType render')
         return <Select {...this.props} isAsync remoteDataFetch={this.updateOptionList} />
     }
 }

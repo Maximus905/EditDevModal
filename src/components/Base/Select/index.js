@@ -23,13 +23,11 @@ class Select extends PureComponent {
     })('')
 
     handleChange = (e) => {
-        console.log(('handleChange in Select'))
         this.setState({selected: e.target.value})
     }
 
 
     invokeListeners = () => {
-        console.log('invoke listeners', this.state.selected, this.filter)
         let {onChange} = this.props
         if (check.function(onChange)) {
             onChange = [onChange]
@@ -48,11 +46,9 @@ class Select extends PureComponent {
         if (isLoading || disabled) return
         if (!optionsInvalidate) return
 
-        console.log('options list will be updated remotely')
         if (isAsync) {
             this.setState({isLoading: true})
             this.optionList = await this.updateRemoteOptionList()
-            console.log('remote list is updated', this.optionList)
         } else {
             this.optionList = this.updateLocalOptionList()
         }
@@ -78,7 +74,6 @@ class Select extends PureComponent {
         const {remoteSourceUrl, filter={}} = this.props
         try {
             const {data} = await axios.post(remoteSourceUrl, filter)
-            console.log('fetched data: ',data)
             return check.array(data) ? data : []
         } catch (error) {
             console.log('error: ', error)
@@ -99,7 +94,6 @@ class Select extends PureComponent {
 
 
     render() {
-        console.log('Select render')
         const {selected} = this.state
 
         const controlLabel = check.not.emptyString(this.props.label) ? <ControlLabel>{this.props.label}</ControlLabel> : null
@@ -121,7 +115,6 @@ class Select extends PureComponent {
         );
     }
     static getDerivedStateFromProps(props, state) {
-        console.log('getDerivedStateFromProps in Select')
         if (JSON.stringify(state.filter) !== JSON.stringify(props.filter)) {
             return {
                 filter: props.filter,
@@ -131,12 +124,10 @@ class Select extends PureComponent {
         return null
     }
     async componentDidMount() {
-        console.log('didMounted', this.state)
         await this.updateIfNeeded()
         this.setDefaultSelected(this.props.defaultSelected)
     }
     async componentDidUpdate() {
-        console.log('didUpdated Select')
         await this.updateIfNeeded()
         this.setDefaultSelected(this.props.defaultSelected)
         this.invokeListeners()

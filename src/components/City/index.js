@@ -9,7 +9,6 @@ class City extends PureComponent {
 
     updateOptionList = RemoteDataProvider(URL)
     render() {
-        console.log('City render')
         return <Select {...this.props} isAsync remoteDataFetch={this.updateOptionList} />
     }
 }

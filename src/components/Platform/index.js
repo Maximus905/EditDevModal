@@ -9,7 +9,6 @@ class Platform extends PureComponent {
 
     updateOptionList = RemoteDataProvider(URL)
     render() {
-        console.log('Platform render')
         return <Select {...this.props} isAsync remoteDataFetch={this.updateOptionList} />
     }
 }

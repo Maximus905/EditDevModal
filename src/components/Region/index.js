@@ -9,7 +9,6 @@ class Region extends PureComponent {
 
     optionListUpdater = RemoteDataProvider(URL)
     render() {
-        console.log('Region render')
         return <Select {...this.props} isAsync remoteDataFetch={this.optionListUpdater} />
     }
 }
