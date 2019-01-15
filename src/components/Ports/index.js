@@ -3,12 +3,14 @@ import PropTypes from 'prop-types'
 import check from "check-types"
 import InUseButton from "../InUseButton"
 import EditableTag from "../Base/EditableTag"
-import {Table} from "react-bootstrap"
+import {Checkbox, Table} from "react-bootstrap"
+import CheckBox from '../Base/CheckBox'
 
 class Ports extends Component {
     portsSet = () => {
         const {data} = this.props
         if (check.not.array(data)) return
+
         return data.map((port, index) => {
             // const button = <InUseButton defaultValue={port.module_in_use} onChange={this.props.onChangeInUseStatus(index)} />
             const ipAddress = port.port_mask_len ? `${port.port_ip}/${port.port_mask_len}` : `${port.port_ip}`
@@ -20,7 +22,9 @@ class Ports extends Component {
                     <td>{ipAddress}</td>
                     <td>{port.port_mac}</td>
                     <td>{port.port_details && port.port_details.description}</td>
-                    <td align="center" valign="middle">mngmnt</td>
+                    <td align="center" valign="middle">
+                        <CheckBox title="management interface" onChange={this.props.onChangeIsMng(index)} checked={port.port_is_mng} style={{marginTop: 0, marginBottom: 0}} />
+                    </td>
                 </tr>
             )
         })
@@ -60,6 +64,10 @@ Ports.propTypes = {
         port_comment: PropTypes.string,
     })),
     onChange: PropTypes.oneOfType([
+        PropTypes.func,
+        PropTypes.arrayOf(PropTypes.func)
+    ]),
+    onChangeIsMng: PropTypes.oneOfType([
         PropTypes.func,
         PropTypes.arrayOf(PropTypes.func)
     ]),

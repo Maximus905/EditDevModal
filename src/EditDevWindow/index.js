@@ -13,6 +13,7 @@ import Input from '../components/Base/Input'
 import TextArea from '../components/Base/TextArea'
 import Modules from '../components/Modules'
 import Ports from '../components/Ports'
+import Location from '../components/Location'
 // import RemoteDataProvider from "../components/Base/RemoteDataProvider"
 
 const DEV_DATA_URL = 'http://netcmdb-loc.rs.ru:8082/api/getDevData.json'
@@ -78,7 +79,7 @@ class EditDevWindow extends Component {
          * @type {{'port_id', 'port_ip', 'port_comment',
          * 'port_details', 'port_is_mng', 'port_mac', 'port_mask_len'}}
          */
-        portsInfo: {}
+        portsInfo: []
     };
     cityFilter = {
         accessor: 'region_id',
@@ -193,6 +194,16 @@ class EditDevWindow extends Component {
         }
 
     }
+    onChangeIsMngCheckBox = (idx) => (state) => {
+        const {value} = state
+        if (value === undefined) return
+        const {portsInfo} = this.state
+        if (portsInfo[idx] && portsInfo[idx].port_is_mng !== value) {
+            portsInfo[idx].port_is_mng = value
+            this.setState({portsInfo})
+        }
+
+    }
 
     fetchDeviceData = async (id) => {
         try {
@@ -257,6 +268,10 @@ class EditDevWindow extends Component {
 
     render() {
         const {devInfo, modulesInfo, portsInfo, mngIp} = this.initialData
+        console.log('4444444444', devInfo.dev_details)
+        const {site = {}} = devInfo && devInfo.dev_details ? devInfo.dev_details : {}
+        console.log('5555555', site)
+
         return (
             <Modal show={this.state.show} onHide={this.handleClose} bsSize="large" >
                 <ModalHeader closeButton>
@@ -285,10 +300,15 @@ class EditDevWindow extends Component {
 
                         <Col md={6}><TextArea controlId="deviceComment" onChange={this.onChangeDeviceComment} placeholder='Комментарий к устройству' defaultValue={devInfo.dev_comment} label="Коментарий к устройству" /></Col>
                     </Row>
-                    <Row><Col md={6}><Checkbox title="Устройство используется" onChange={this.onChangeDevInUse} checked={this.state.devInfo.dev_in_use || true} >Устройство используется</Checkbox></Col></Row>
+                    <Row><Col md={6}><Checkbox title="Устройство используется" onChange={this.onChangeDevInUse} checked={this.state.devInfo.dev_in_use || false} >Устройство используется</Checkbox></Col></Row>
                     <Row>
                         <Col md={10}><Modules data={modulesInfo} onChange={this.onChangeModuleComment} onChangeInUseStatus={this.onChangeModuleInUseStatus} /></Col>
-                        <Col md={12}><Ports data={portsInfo} /></Col>
+                        <Col md={12}><Ports data={portsInfo} onChangeIsMng={this.onChangeIsMngCheckBox} /></Col>
+                    </Row>
+                    <Row>
+                        <Col md={10}>
+                            <Location data={site} />
+                        </Col>
                     </Row>
                 </ModalBody>
                 <ModalFooter>

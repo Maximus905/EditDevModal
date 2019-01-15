@@ -1,4 +1,4 @@
-import React, {Component} from 'react'
+import React, {PureComponent} from 'react'
 import PropTypes from 'prop-types'
 import check from 'check-types'
 import {Table} from 'react-bootstrap'
@@ -6,7 +6,7 @@ import EditableTag from '../Base/EditableTag'
 import InUseButton from '../InUseButton'
 
 
-class Modules extends Component {
+class Modules extends PureComponent {
 
     modulesSet = () => {
         const {data} = this.props

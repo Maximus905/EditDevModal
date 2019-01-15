@@ -1,9 +1,9 @@
-import React, {Component} from 'react'
+import React, {PureComponent} from 'react'
 import PropTypes from 'prop-types'
 import check from "check-types"
 import ContentEditable from "react-contenteditable"
 
-class EditableTag extends Component {
+class EditableTag extends PureComponent {
 
     state = {
         value: ''
@@ -17,9 +17,13 @@ class EditableTag extends Component {
 
 
     setDefaultValue = ((prevValue) => (value) => {
-        if (check.nonEmptyString(value) && prevValue !== value) {
-            prevValue = value
-            this.setState({value})
+        let normalized = value
+        if (check.number(value)) {
+            normalized = value.toString()
+        }
+        if (check.nonEmptyString(normalized) && prevValue !== normalized) {
+            prevValue = normalized
+            this.setState({value: normalized})
         }
     })('')
 
@@ -36,7 +40,7 @@ class EditableTag extends Component {
 
     render() {
         return (
-            <ContentEditable html={this.state.value} innerRef={this.contentEditable} onChange={this.handleOnChangeComment} tagName={this.props.tagName} style={{'wordWrap': 'break-word'}} />
+            <ContentEditable html={this.state.value} innerRef={this.contentEditable} onChange={this.handleOnChangeComment} tagName={this.props.tagName} style={{'wordWrap': 'break-word'}} disabled={this.props.disabled} />
         )
     }
 
@@ -51,7 +55,7 @@ class EditableTag extends Component {
 }
 
 EditableTag.propTypes = {
-    defaultValue: PropTypes.string,
+    defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     tagName: PropTypes.string,
     disabled: PropTypes.bool,
     onChange: PropTypes.oneOfType([
