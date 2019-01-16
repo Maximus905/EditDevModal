@@ -11,23 +11,25 @@ class EditableTag extends PureComponent {
 
     contentEditable = React.createRef()
 
-    handleOnChangeComment = (e) => {
+    handleOnChange = (e) => {
+        console.log('----------------', e.target.value)
         this.setState({value: e.target.value})
     }
 
 
     setDefaultValue = ((prevValue) => (value) => {
-        let normalized = value
-        if (check.number(value)) {
-            normalized = value.toString()
-        }
-        if (check.nonEmptyString(normalized) && prevValue !== normalized) {
-            prevValue = normalized
-            this.setState({value: normalized})
+        if (value === undefined || value === null) return
+        if (check.number(value)) value = value.toString()
+        if (value && prevValue !== value) {
+            prevValue = value
+            this.setState({value})
         }
     })('')
 
-    invokeListeners = () => {
+    invokeListeners = ((prevState) => () => {
+        if (JSON.stringify(prevState) === JSON.stringify(this.state)) return
+        prevState = Object.assign({}, this.state)
+
         let {onChange} = this.props
         if (check.function(onChange)) {
             onChange = [onChange]
@@ -36,11 +38,13 @@ class EditableTag extends PureComponent {
         for (const subscriber of onChange) {
             subscriber(Object.assign({}, this.state))
         }
-    }
+    })({})
 
     render() {
+        console.log('render')
+        const html = this.state.value
         return (
-            <ContentEditable html={this.state.value} innerRef={this.contentEditable} onChange={this.handleOnChangeComment} tagName={this.props.tagName} style={{'wordWrap': 'break-word'}} disabled={this.props.disabled} />
+            <ContentEditable html={html} innerRef={this.contentEditable} onChange={this.handleOnChange} tagName={this.props.tagName} style={{'wordWrap': 'break-word'}} disabled={this.props.disabled} />
         )
     }
 

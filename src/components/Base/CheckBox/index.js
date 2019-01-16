@@ -1,9 +1,9 @@
-import React, {Component} from 'react'
+import React, {PureComponent} from 'react'
 import PropTypes from 'prop-types'
 import check from "check-types"
 import {Checkbox} from "react-bootstrap"
 
-class CheckBox extends Component {
+class CheckBox extends PureComponent {
     state = {
         value: this.props.checked
     }

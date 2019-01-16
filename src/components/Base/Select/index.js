@@ -7,7 +7,7 @@ import axios from "axios"
 class Select extends PureComponent {
 
     state = {
-        selected: '',
+        value: '',
         isLoading: false,
         optionsInvalidate: true,
         filter: {}
@@ -19,11 +19,11 @@ class Select extends PureComponent {
         if (prevValue === value.toString()) return
         if (this.optionList.filter((item) => item.value === value).length === 0) return
         prevValue = value.toString()
-        this.setState({selected: prevValue})
+        this.setState({value: prevValue})
     })('')
 
     handleChange = (e) => {
-        this.setState({selected: e.target.value})
+        this.setState({value: e.target.value})
     }
 
 
@@ -94,18 +94,17 @@ class Select extends PureComponent {
 
 
     render() {
-        const {selected} = this.state
-
-        const controlLabel = check.not.emptyString(this.props.label) ? <ControlLabel>{this.props.label}</ControlLabel> : null
+        const {value} = this.state
+        const controlLabel = check.string(this.props.label) ? <ControlLabel>{this.props.label}</ControlLabel> : null
         return (
             <Fragment>
-                <FormGroup controlId={this.props.controlId}>
+                <FormGroup controlId={this.props.controlId} style={this.props.style}>
                     {controlLabel}
                     <FormControl
                         onChange={this.handleChange}
                         componentClass="select"
                         placeholder="select item"
-                        value={selected}
+                        value={value}
                         disabled={this.props.disabled}
                     >
                         {this.buildOptionList()}
@@ -140,10 +139,6 @@ class Select extends PureComponent {
  * onChange - function or array of functions, that will be invoke on state change
  */
 Select.propTypes = {
-    deviceId: PropTypes.oneOfType([
-        PropTypes.number,
-        PropTypes.string
-    ]),
     controlId: PropTypes.string,
     //local option list if isAsync = false
     optionList: PropTypes.arrayOf(PropTypes.shape(
@@ -174,7 +169,8 @@ Select.propTypes = {
             PropTypes.number,
             PropTypes.string
         ])
-    })
+    }),
+    style: PropTypes.object
 }
 Select.defaultProps = {
     optionList: [],
