@@ -2,14 +2,17 @@ import React, {PureComponent} from 'react'
 import PropTypes from 'prop-types'
 import Select from '../Base/Select'
 import RemoteDataProvider from '../Base/RemoteDataProvider'
+import check from "check-types"
 
 const URL = 'http://netcmdb-loc.rs.ru:8082/api/getSoftwareList.json'
 
 class Software extends PureComponent {
 
-    updateOptionList = RemoteDataProvider(URL)
+    optionListUpdater = RemoteDataProvider(URL)
     render() {
-        return <Select {...this.props} isAsync remoteDataFetch={this.updateOptionList} />
+        const onChange = check.function(this.props.onChange) ? this.props.onChange('software_id') : undefined
+        console.log('devType', this.props.defaultSelected)
+        return <Select {...this.props} isAsync remoteDataFetch={this.optionListUpdater} onChange={onChange} />
     }
 }
 

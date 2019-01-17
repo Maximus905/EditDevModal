@@ -1,4 +1,4 @@
-import React, {Component} from 'react'
+import React, {PureComponent} from 'react'
 import PropTypes from 'prop-types'
 import check from "check-types"
 import InUseButton from "../InUseButton"
@@ -6,7 +6,11 @@ import EditableTag from "../Base/EditableTag"
 import {Checkbox, Table} from "react-bootstrap"
 import CheckBox from '../Base/CheckBox'
 
-class Ports extends Component {
+class Ports extends PureComponent {
+    state = {
+        managingPorts: []
+    }
+
     portsSet = () => {
         const {data} = this.props
         if (check.not.array(data)) return
@@ -23,7 +27,7 @@ class Ports extends Component {
                     <td>{port.port_mac}</td>
                     <td>{port.port_details && port.port_details.description}</td>
                     <td align="center" valign="middle">
-                        <CheckBox title="management interface" onChange={this.props.onChangeIsMng(index)} checked={port.port_is_mng} style={{marginTop: 0, marginBottom: 0}} />
+                        <CheckBox title="management interface" onChange={this.props.onChange('port_is_mng')(index)} checked={port.port_is_mng} style={{marginTop: 0, marginBottom: 0}} />
                     </td>
                 </tr>
             )
@@ -49,6 +53,14 @@ class Ports extends Component {
             </Table>
         )
     }
+
+    componentDidMount() {
+
+    }
+
+    componentDidUpdate() {
+
+    }
 }
 
 Ports.propTypes = {
@@ -63,11 +75,8 @@ Ports.propTypes = {
         }),
         port_comment: PropTypes.string,
     })),
+    currentMng: PropTypes.array,
     onChange: PropTypes.oneOfType([
-        PropTypes.func,
-        PropTypes.arrayOf(PropTypes.func)
-    ]),
-    onChangeIsMng: PropTypes.oneOfType([
         PropTypes.func,
         PropTypes.arrayOf(PropTypes.func)
     ]),

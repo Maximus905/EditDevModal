@@ -1,5 +1,6 @@
 import React, {PureComponent} from 'react'
 import PropTypes from 'prop-types'
+import check from 'check-types'
 import Select from '../Base/Select'
 import RemoteDataProvider from '../Base/RemoteDataProvider'
 
@@ -9,7 +10,9 @@ class Region extends PureComponent {
 
     optionListUpdater = RemoteDataProvider(URL)
     render() {
-        return <Select {...this.props} isAsync remoteDataFetch={this.optionListUpdater} />
+        const onChange = check.function(this.props.onChange) ? this.props.onChange('region_id') : undefined
+        // console.log('region', this.props.defaultSelected)
+        return <Select {...this.props} onChange={onChange} isAsync remoteDataFetch={this.optionListUpdater} defaultSelected={this.props.defaultSelected} />
     }
 }
 

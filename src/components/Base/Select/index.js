@@ -15,15 +15,22 @@ class Select extends PureComponent {
     optionList = []
 
     setDefaultSelected = ((prevValue) => (value) => {
-        if (!value || this.state.optionsInvalidate || this.state.isLoading) return
-        if (prevValue === value.toString()) return
+        if (value === undefined || value === null || this.state.optionsInvalidate || this.state.isLoading) return
+        if (prevValue === value) return
         if (this.optionList.filter((item) => item.value === value).length === 0) return
-        prevValue = value.toString()
+        prevValue = value
         this.setState({value: prevValue})
     })('')
 
     handleChange = (e) => {
-        this.setState({value: e.target.value})
+        console.log('type', typeof e.target.value)
+        let value = parseInt(e.target.value)
+        if (!isNaN(value) && value.toString && value.toString() === e.target.value) {
+            this.setState({value})
+        }  else {
+            this.setState({value: e.target.value})
+        }
+
     }
 
 
