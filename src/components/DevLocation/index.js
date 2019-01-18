@@ -5,10 +5,8 @@ import EditableTag from "../Base/EditableTag"
 import Select from "../Base/Select"
 
 class DevLocation extends PureComponent {
-    oldData
     render() {
         const {onChange, floor, row, rack, unit, rackSide} = this.props
-        console.log('location222222222222', floor, row, rack, unit, rackSide )
         const rackSideOptions = [{value: "Front", label: "Front"}, {value: "Back", label: "Back"}]
         return (
             <Table responsive bordered condensed style={{"tableLayout": "fixed"}}  >

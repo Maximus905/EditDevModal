@@ -211,41 +211,25 @@ class EditDevWindow extends Component {
         }
         // console.log('Modules', modules)
     }
-    onChangeMngPort = (idx) => ({value}) => {
-        const {ports} = this.currentState
-        if (value === true) {
-            ports.forEach((port, index) => {port.port_is_mng = index === idx})
-        } else {
-            ports[idx].port_is_mng = value
-        }
-        const mngPorts = ports.filter((port) => port.port_is_mng).map((port) => port.port_id)
-        if (value && this.state.mngPorts.join('') !== mngPorts.join('')) {
-            console.log('UPDATE MNG IN STATE', mngPorts, this.currentState.ports)
-            // this.setState({mngPorts})
-        }
-        console.log('mng=========', mngPorts)
-    }
-    onChangePort = (key) => (idx) => ({value}) => {
-        const {ports} = this.currentState
-        if (key === 'port_is_mng') {
-            this.onChangeMngPort(idx)({value})
-        } else {
-            if (ports[idx] && ports[idx][key] !== value) {
-                ports[idx][key] = value
-            }
-        }
-        console.log('Ports', ports)
+    onChangePorts = ({ports}) => {
+        if (check.not.nonEmptyArray(ports)) return
+        const {ports: currentPorts} = this.currentState
+        const updatedPorts = currentPorts.map((port, index) => {
+            return {...port, port_is_mng: ports[index].port_is_mng}
+        })
+        this.currentState.ports = updatedPorts
+        console.log('Ports', this.currentState.ports)
     }
     onChangeDevLocation = (key) => ({value}) => {
         if (value === undefined) return
-        const {devInfo, devInfo: {dev_details = {}}} = this.state
-        if (!devInfo.dev_details)  devInfo.dev_details = {}
-        const {site = {}} = devInfo.dev_details
-        const newSite = Object.assign({}, site, {[key]: value})
-        devInfo.dev_details.site = newSite
-        const newDevDetails = Object.assign({}, dev_details, {site: newSite})
-        console.log('changeLoc ',key, devInfo, newDevDetails.site)
-        this.setState({devInfo: Object.assign({}, devInfo)})
+        // const {devInfo, devInfo: {dev_details = {}}} = this.state
+        // if (!devInfo.dev_details)  devInfo.dev_details = {}
+        // const {site = {}} = devInfo.dev_details
+        // const newSite = Object.assign({}, site, {[key]: value})
+        // devInfo.dev_details.site = newSite
+        // const newDevDetails = Object.assign({}, dev_details, {site: newSite})
+        // console.log('changeLoc ',key, devInfo, newDevDetails.site)
+        // this.setState({devInfo: Object.assign({}, devInfo)})
     }
 
     fetchDeviceData = async (id) => {
@@ -328,7 +312,7 @@ class EditDevWindow extends Component {
     render() {
         const {geoLocation, devInfo, modules, ports} = this.initialData
         const mngIp = this.managingIp(ports)
-        const devLocation = (() => {
+        const devSite = (() => {
             const {floor, row, rack, unit, rackSide} = devInfo && devInfo.dev_details && devInfo.dev_details.site ? devInfo.dev_details.site : {}
             return {floor, row, rack, unit, rackSide}
         })()
@@ -364,13 +348,13 @@ class EditDevWindow extends Component {
                     <Row><Col md={6}><CheckBox title="Устройство используется" onChange={this.onChangeDevInfo('dev_in_use')} checked={devInfo.dev_in_use} >Устройство используется</CheckBox></Col></Row>
                     <Row>
                         <Col md={10}><Modules data={modules} onChange={this.onChangeModule} /></Col>
-                        <Col md={12}><Ports data={ports} onChange={this.onChangePort} /></Col>
+                        <Col md={12}><Ports data={ports} onChange={this.onChangePorts} /></Col>
                     </Row>
-                    {/*<Row>*/}
-                        {/*<Col md={10}>*/}
-                            {/*<DevLocation {...devLocation} onChange={this.onChangeDevLocation} />*/}
-                        {/*</Col>*/}
-                    {/*</Row>*/}
+                    <Row>
+                        <Col md={10}>
+                            <DevLocation {...devSite} onChange={this.onChangeDevLocation} />
+                        </Col>
+                    </Row>
                 </ModalBody>
                 <ModalFooter>
                     <Button onClick={this.handleClose} bsStyle="danger" >Отмена</Button>
