@@ -324,28 +324,28 @@ class EditDevWindow extends Component {
                     <Modal.Title>Modal heading. Device ID: {this.state.devId} </Modal.Title>
                 </ModalHeader>
                 <ModalBody className={custCss.modalBody} >
-                    <Row>
-                        <Col md={2}><Region onChange={this.onChangeGeoLocation} defaultSelected={geoLocation.region_id}/></Col>
-                        <Col md={2}><City onChange={this.onChangeGeoLocation} defaultSelected={geoLocation.city_id} filter={this.cityFilter}/></Col>
-                        <Col md={4}><Office onChange={this.onChangeDevInfo} defaultSelected={devInfo.location_id} /></Col>
-                        <Col md={4}><TextArea controlId="officeComment" onChange={this.onChangeGeoLocation('office_comment')} placeholder='Комментарий к офису' defaultValue={geoLocation.office_comment} label="Комментарий к оффису" /></Col>
-                    </Row>
-                    <Row>
-                        <Col md={3}><DevType onChange={this.onChangeDevInfo} defaultSelected={devInfo.dev_type_id} /></Col>
-                        <Col md={3}><Platform defaultSelected={devInfo.platform_id}/></Col>
-                        <Col md={3}><Software onChange={this.onChangeDevInfo}  defaultSelected={devInfo.software_id} /></Col>
-                        <Col md={3}><Input controlId='swVer' onChange={this.onChangeDevInfo('software_ver')} defaultValue={devInfo.software_ver} label="Версия ПО"/></Col>
-                    </Row>
-                    <Row>
-                        <Col md={3}><Input controlId='devSn' addOnPosition="left" addOnText="SN" onChange={this.onChangeDevInfo('platform_sn')} defaultValue={devInfo.platform_sn} label=" " disabled/></Col>
-                        <Col md={3}><Input controlId='devAltSn' addOnPosition="left" addOnText="alt SN" onChange={this.onChangeDevInfo('platform_sn_alt')} defaultValue={devInfo.platform_sn_alt} label=" " /></Col>
-                        <Col md={3}><Input controlId='hostname' addOnPosition="left" addOnText="hostname" onChange={this.onChangeDevDetails('hostname')} defaultValue={devInfo.dev_details && devInfo.dev_details.hostname} label=" " /></Col>
-                        <Col md={3}><Input controlId='managementIP' addOnPosition="left" addOnText="management IP" onChange={this.onChangeMngIp} label=" " defaultValue={mngIp} /></Col>
-                    </Row>
-                    <Row>
-                        <Col md={6}><TextArea controlId="deviceComment" onChange={this.onChangeDevInfo('dev_comment')} placeholder='Комментарий к устройству' defaultValue={devInfo.dev_comment} label="Коментарий к устройству" /></Col>
-                    </Row>
-                    <Row><Col md={6}><CheckBox title="Устройство используется" onChange={this.onChangeDevInfo('dev_in_use')} checked={devInfo.dev_in_use} >Устройство используется</CheckBox></Col></Row>
+                    {/*<Row>*/}
+                        {/*<Col md={2}><Region onChange={this.onChangeGeoLocation} defaultSelected={geoLocation.region_id}/></Col>*/}
+                        {/*<Col md={2}><City onChange={this.onChangeGeoLocation} defaultSelected={geoLocation.city_id} filter={this.cityFilter}/></Col>*/}
+                        {/*<Col md={4}><Office onChange={this.onChangeDevInfo} defaultSelected={devInfo.location_id} /></Col>*/}
+                        {/*<Col md={4}><TextArea controlId="officeComment" onChange={this.onChangeGeoLocation('office_comment')} placeholder='Комментарий к офису' defaultValue={geoLocation.office_comment} label="Комментарий к оффису" /></Col>*/}
+                    {/*</Row>*/}
+                    {/*<Row>*/}
+                        {/*<Col md={3}><DevType onChange={this.onChangeDevInfo} defaultSelected={devInfo.dev_type_id} /></Col>*/}
+                        {/*<Col md={3}><Platform defaultSelected={devInfo.platform_id}/></Col>*/}
+                        {/*<Col md={3}><Software onChange={this.onChangeDevInfo}  defaultSelected={devInfo.software_id} /></Col>*/}
+                        {/*<Col md={3}><Input controlId='swVer' onChange={this.onChangeDevInfo('software_ver')} defaultValue={devInfo.software_ver} label="Версия ПО"/></Col>*/}
+                    {/*</Row>*/}
+                    {/*<Row>*/}
+                        {/*<Col md={3}><Input controlId='devSn' addOnPosition="left" addOnText="SN" onChange={this.onChangeDevInfo('platform_sn')} defaultValue={devInfo.platform_sn} label=" " disabled/></Col>*/}
+                        {/*<Col md={3}><Input controlId='devAltSn' addOnPosition="left" addOnText="alt SN" onChange={this.onChangeDevInfo('platform_sn_alt')} defaultValue={devInfo.platform_sn_alt} label=" " /></Col>*/}
+                        {/*<Col md={3}><Input controlId='hostname' addOnPosition="left" addOnText="hostname" onChange={this.onChangeDevDetails('hostname')} defaultValue={devInfo.dev_details && devInfo.dev_details.hostname} label=" " /></Col>*/}
+                        {/*<Col md={3}><Input controlId='managementIP' addOnPosition="left" addOnText="management IP" onChange={this.onChangeMngIp} label=" " defaultValue={mngIp} /></Col>*/}
+                    {/*</Row>*/}
+                    {/*<Row>*/}
+                        {/*<Col md={6}><TextArea controlId="deviceComment" onChange={this.onChangeDevInfo('dev_comment')} placeholder='Комментарий к устройству' defaultValue={devInfo.dev_comment} label="Коментарий к устройству" /></Col>*/}
+                    {/*</Row>*/}
+                    {/*<Row><Col md={6}><CheckBox title="Устройство используется" onChange={this.onChangeDevInfo('dev_in_use')} checked={devInfo.dev_in_use} >Устройство используется</CheckBox></Col></Row>*/}
                     <Row>
                         <Col md={10}><Modules data={modules} onChange={this.onChangeModule} /></Col>
                         <Col md={12}><Ports data={ports} onChange={this.onChangePorts} /></Col>

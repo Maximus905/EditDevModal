@@ -11,24 +11,30 @@ class EditableTag extends PureComponent {
 
     contentEditable = React.createRef()
 
+    formatValue = this.props.formatValue ? this.props.formatValue : (value) => value
+
     handleOnChange = (e) => {
-        console.log('----------------', e.target.value)
-        this.setState({value: e.target.value})
+        if (this.props.stateless) {
+            this.invokeListeners({value: this.formatValue(e.target.value)})
+        } else {
+            this.setState({value: this.formatValue(e.target.value)})
+        }
     }
 
 
     setDefaultValue = ((prevValue) => (value) => {
-        if (value === undefined || value === null) return
-        if (check.number(value)) value = value.toString()
-        if (value && prevValue !== value) {
+        if (this.props.stateless || value === undefined || value === null) return
+        if (prevValue !== value) {
             prevValue = value
             this.setState({value})
         }
-    })('')
+    })(this.props.value)
 
-    invokeListeners = ((prevState) => () => {
-        if (JSON.stringify(prevState) === JSON.stringify(this.state)) return
-        prevState = Object.assign({}, this.state)
+    invokeListeners = ((prevState) => (eventValue) => {
+        const currentState = () => this.props.stateless ? eventValue : this.state
+
+        if (currentState() === undefined || (!this.props.stateless && JSON.stringify(prevState) === JSON.stringify(currentState()))) return
+        prevState = currentState()
 
         let {onChange} = this.props
         if (check.function(onChange)) {
@@ -36,39 +42,59 @@ class EditableTag extends PureComponent {
         }
         if (check.not.array(onChange)) return
         for (const subscriber of onChange) {
-            subscriber(Object.assign({}, this.state))
+            subscriber(prevState)
         }
-    })({})
+    })(this.props.stateless ? this.props.value : this.state)
+
+    convertValueToHtml = (value) => {
+        return value === undefined || value === null ? '' : (value && value.toString ? value.toString() : '')
+    }
 
     render() {
         console.log('render')
-        const html = this.state.value
+        const html = this.convertValueToHtml(this.props.stateless ? this.props.value : this.state.value)
         return (
-            <ContentEditable html={html} innerRef={this.contentEditable} onChange={this.handleOnChange} tagName={this.props.tagName} style={{'wordWrap': 'break-word'}} disabled={this.props.disabled} />
+            <ContentEditable html={html} innerRef={this.contentEditable} onChange={this.handleOnChange} tagName={this.props.tagName} style={{'wordWrap': 'break-word'}} className={this.props.className} disabled={this.props.disabled} />
         )
     }
 
     componentDidMount() {
-        this.setDefaultValue(this.props.defaultValue)
-        this.invokeListeners()
+        this.setDefaultValue(this.props.value)
+        if (!this.props.stateless) this.invokeListeners()
+
     }
     componentDidUpdate() {
-        this.setDefaultValue(this.props.defaultValue)
-        this.invokeListeners()
+        this.setDefaultValue(this.props.value)
+        if (!this.props.stateless) this.invokeListeners()
     }
 }
 
 EditableTag.propTypes = {
-    defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    stateless: PropTypes.bool,
+    /**
+     * in stateless mode value define component's state but in stateful mode it's default value and set up only once
+     */
+    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    /**
+     * returned value will be pass to external onChange functions and written in inner state
+     * @param string value
+     * @return (string|number|null)
+     */
+    formatValue: PropTypes.func,
     tagName: PropTypes.string,
     disabled: PropTypes.bool,
     onChange: PropTypes.oneOfType([
         PropTypes.func,
         PropTypes.arrayOf(PropTypes.func)
     ]),
+    className: PropTypes.string,
+    /** prepare value to render
+     * @return string
+     */
 }
 EditableTag.defaultProps = {
-    defaultValue: '',
+    stateless: false,
+    value: '',
     tagName: 'div',
     disabled: true,
 }

@@ -1,0 +1,16 @@
+.formGroupZeroMargin {
+    margin: 0
+}
+.indents {
+    padding: 3px !important;
+}
+.ip {
+    composes: indents;
+    display: inline !important;
+    width: calc(100% - 50px) !important;
+}
+.mask {
+    composes: indents;
+    display: inline !important;
+    width: calc(30px) !important;
+}
