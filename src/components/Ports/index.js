@@ -41,7 +41,9 @@ class Ports extends PureComponent {
     }
     maskLenFormat = ((prevValue) => (value) => {
         if (check.not.string(value)) console.log('=========not string')
-        if (!isNaN(parseFloat(value)) && isFinite(value)) {
+        if (check.emptyString(value)) {
+            prevValue = null
+        } else if (!isNaN(parseFloat(value)) && isFinite(value) && parseInt(value) <= 32) {
             prevValue = parseInt(value)
         }
         return  prevValue
