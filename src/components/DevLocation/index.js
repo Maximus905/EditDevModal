@@ -21,10 +21,10 @@ class DevLocation extends PureComponent {
                 </thead>
                 <tbody>
                     <tr>
-                        <EditableTag disabled={false} tagName='td' defaultValue={floor} onChange={onChange('floor')} />
-                        <EditableTag disabled={false} tagName='td' defaultValue={row} onChange={onChange('row')} />
-                        <EditableTag disabled={false} tagName='td' defaultValue={rack} onChange={onChange('rack')} />
-                        <EditableTag disabled={false} tagName='td' defaultValue={unit} onChange={onChange('unit')} />
+                        <EditableTag disabled={false} tagName='td' value={floor} onChange={onChange('floor')} />
+                        <EditableTag disabled={false} tagName='td' value={row} onChange={onChange('row')} />
+                        <EditableTag disabled={false} tagName='td' value={rack} onChange={onChange('rack')} />
+                        <EditableTag disabled={false} tagName='td' value={unit} onChange={onChange('unit')} />
                         <td><Select style={{marginBottom: 0}} isAsync={false} optionList={rackSideOptions} defaultSelected={rackSide} onChange={onChange('rackSide')} /></td>
                     </tr>
 

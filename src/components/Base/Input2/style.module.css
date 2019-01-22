@@ -5,13 +5,8 @@
     padding: 3px !important;
     height: 1.7em;
 }
-.ip {
+.size {
     composes: indents;
     display: inline !important;
-    width: calc(100% - 50px) !important;
-}
-.mask {
-    composes: indents;
-    display: inline !important;
-    width: calc(30px) !important;
+    width: 100% !important;
 }

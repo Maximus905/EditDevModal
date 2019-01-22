@@ -17,7 +17,7 @@ class EditableTag extends PureComponent {
         if (this.props.stateless) {
             this.invokeListeners({value: this.formatValue(e.target.value)})
         } else {
-            this.setState({value: this.formatValue(e.target.value)})
+            this.setState({value: e.target.value})
         }
     }
 

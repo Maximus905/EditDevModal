@@ -78,13 +78,19 @@ class EditDevWindow extends Component {
       * }} Module
       *
       * @typedef {{
+      *     description: string,
+      *     portName: string
+      * }} PortDetails
+      *
+      * @typedef {{
       *     port_id: number,
-      *     port_ip,
-      *     port_comment,
-      *     port_details,
-      *     port_is_mng,
-      *     port_mac,
-      *     port_mask_len
+      *     port_ip: string,
+      *     port_comment: string,
+      *     port_details: PortDetails,
+      *     port_is_mng: boolean,
+      *     port_mac: string,
+      *     port_mask_len: (string|number),
+      *     newPort: boolean // for created ports is true
       * }} Port
       *
       * @typedef {{
@@ -212,24 +218,18 @@ class EditDevWindow extends Component {
         // console.log('Modules', modules)
     }
     onChangePorts = ({ports}) => {
-        if (check.not.nonEmptyArray(ports)) return
-        const {ports: currentPorts} = this.currentState
-        const updatedPorts = currentPorts.map((port, index) => {
-            return {...port, port_is_mng: ports[index].port_is_mng}
+        ports = ports.map((port) => {
+            return {...port, port_mask_len: port.port_mask_len === '' ? null : parseInt(port.port_mask_len)}
         })
-        this.currentState.ports = updatedPorts
-        console.log('Ports', this.currentState.ports)
+        this.currentState.ports = ports
+        console.log('Ports', ports)
     }
     onChangeDevLocation = (key) => ({value}) => {
         if (value === undefined) return
-        // const {devInfo, devInfo: {dev_details = {}}} = this.state
-        // if (!devInfo.dev_details)  devInfo.dev_details = {}
-        // const {site = {}} = devInfo.dev_details
-        // const newSite = Object.assign({}, site, {[key]: value})
-        // devInfo.dev_details.site = newSite
-        // const newDevDetails = Object.assign({}, dev_details, {site: newSite})
-        // console.log('changeLoc ',key, devInfo, newDevDetails.site)
-        // this.setState({devInfo: Object.assign({}, devInfo)})
+        const {devInfo} = this.currentState
+        if (!(devInfo && devInfo.dev_details && devInfo.dev_details.site))  return
+        devInfo.dev_details.site[key] = value
+        console.log('SITE', devInfo.dev_details.site)
     }
 
     fetchDeviceData = async (id) => {
@@ -316,7 +316,7 @@ class EditDevWindow extends Component {
             const {floor, row, rack, unit, rackSide} = devInfo && devInfo.dev_details && devInfo.dev_details.site ? devInfo.dev_details.site : {}
             return {floor, row, rack, unit, rackSide}
         })()
-        console.log('EditDevWindow render', this.initialData.devInfo, 'ready', this.state.devDataReady, 'loading', this.state.devDataLoading, this.state.show, this.state.devId, 'defSelected', geoLocation.region_id)
+        console.log('EditDevWindow render', this.initialData.devInfo, 'ready', this.state.devDataReady, 'loading', this.state.devDataLoading, this.state.show, this.state.devId, 'defSelected', geoLocation.region_id, devSite)
 
         return (
             <Modal show={this.state.show} onHide={this.handleClose} bsSize="large" >
