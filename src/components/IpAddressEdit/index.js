@@ -2,7 +2,7 @@ import React, {PureComponent, Fragment} from 'react'
 import PropTypes from 'prop-types'
 import check from 'check-types'
 import css from './style.module.css'
-import {FormGroup, FormControl, ControlLabel, InputGroup} from 'react-bootstrap'
+import {FormGroup, FormControl, ControlLabel} from 'react-bootstrap'
 
 class IpAddressEdit extends PureComponent {
     state = {

@@ -10,7 +10,7 @@ class Office extends PureComponent {
 
     optionListUpdater = RemoteDataProvider(URL)
     render() {
-        const onChange = check.function(this.props.onChange) ? this.props.onChange('location_id') : undefined
+        const onChange = check.function(this.props.onChange) ? this.props.onChange('office_id') : undefined
         return <Select {...this.props} onChange={onChange} isAsync remoteDataFetch={this.optionListUpdater} />
     }
 }

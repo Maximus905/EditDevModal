@@ -12,13 +12,14 @@ class Modules extends PureComponent {
         const {data} = this.props
         if (check.not.array(data)) return
         return data.map((module, index) => {
+            console.log('MODULE=========', module)
             const button = <InUseButton defaultValue={module.module_in_use} onChange={this.props.onChange('module_in_use')(index)} />
             return (
                 <tr key={index}>
                     <td>{index + 1}</td>
                     <td className={module.module_not_found ? 'bg-danger' : null}>{module.module}</td>
                     <td>{module.module_item_sn}</td>
-                    <EditableTag disabled={false} tagName={'td'} defaultValue={module.module_item_comment} onChange={this.props.onChange('module_item_comment')(index)}/>
+                    <EditableTag disabled={false} tagName={'td'} value={module.module_item_comment} onChange={this.props.onChange('module_item_comment')(index)}/>
                     <td align="center" valign="middle">{button}</td>
                 </tr>
             )
@@ -49,6 +50,7 @@ class Modules extends PureComponent {
 Modules.propTypes = {
     data: PropTypes.arrayOf(PropTypes.shape({
         module: PropTypes.string,
+        module_id: PropTypes.number,
         module_in_use: PropTypes.bool,
         module_item_details: PropTypes.object,
         module_item_comment: PropTypes.string,

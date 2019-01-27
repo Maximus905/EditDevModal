@@ -28,7 +28,7 @@ class EditableTag extends PureComponent {
             prevValue = value
             this.setState({value})
         }
-    })(this.props.value)
+    })('')
 
     invokeListeners = ((prevState) => (eventValue) => {
         const currentState = () => this.props.stateless ? eventValue : this.state

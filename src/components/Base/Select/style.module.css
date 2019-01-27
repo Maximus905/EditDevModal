@@ -1,0 +1,12 @@
+.formGroupZeroMargin {
+    margin: 0
+}
+.indents {
+    padding: 3px !important;
+    height: 1.8em;
+}
+.size {
+    composes: indents;
+    display: inline !important;
+    width: 100% !important;
+}

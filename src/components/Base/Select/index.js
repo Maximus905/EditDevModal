@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import {FormControl, ControlLabel, FormGroup} from 'react-bootstrap'
 import check from 'check-types'
 import axios from "axios"
+import css from "./style.module.css"
 
 class Select extends PureComponent {
 
@@ -41,6 +42,7 @@ class Select extends PureComponent {
         }
         if (check.not.array(onChange)) return
         for (const subscriber of onChange) {
+            console.log('SUBSCRIBER')
             subscriber(Object.assign({}, this.state))
         }
     }
@@ -96,16 +98,17 @@ class Select extends PureComponent {
             ({value, label}, key) => {
                 return <option value={value} key={key}>{label}</option>
             })
-        return [emptyOption, ...optionsSet]
+        return this.props.emptyOption ? [emptyOption, ...optionsSet] : optionsSet
     }
 
 
     render() {
+        const clearMargin = this.props.clearMargin ? css.formGroupZeroMargin : undefined
         const {value} = this.state
         const controlLabel = check.string(this.props.label) ? <ControlLabel>{this.props.label}</ControlLabel> : null
         return (
             <Fragment>
-                <FormGroup controlId={this.props.controlId} style={this.props.style}>
+                <FormGroup controlId={this.props.controlId} style={this.props.style} bsClass={clearMargin}>
                     {controlLabel}
                     <FormControl
                         onChange={this.handleChange}
@@ -113,6 +116,7 @@ class Select extends PureComponent {
                         placeholder="select item"
                         value={value}
                         disabled={this.props.disabled}
+                        className={this.props.smallSize ? css.size : undefined}
                     >
                         {this.buildOptionList()}
                     </FormControl>
@@ -159,6 +163,7 @@ Select.propTypes = {
     )),
     disabled: PropTypes.bool,
     label: PropTypes.string,
+    emptyOption: PropTypes.bool, //add or not empty option into list
     emptyValue: PropTypes.string,
     emptyLabel: PropTypes.string,
     defaultSelected: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
@@ -177,9 +182,12 @@ Select.propTypes = {
             PropTypes.string
         ])
     }),
-    style: PropTypes.object
+    style: PropTypes.object,
+    clearMargin: PropTypes.bool,
+    smallSize: PropTypes.bool
 }
 Select.defaultProps = {
+    emptyOption: true,
     optionList: [],
     isAsync: false,
     onChange: [],
