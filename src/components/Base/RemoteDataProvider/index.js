@@ -1,10 +1,10 @@
 import axios from 'axios'
 import check from 'check-types'
 
-const RemoteDataProvider = (url) => async function (filter) {
+const RemoteDataProvider = (url, key) => async function (filter) {
     try {
-        const {data: {rc}} = await axios.post(url, filter)
-        return rc.filter(item => {
+        const {data} = await axios.post(url, filter)
+        return data[key].filter(item => {
             return check.not.emptyString(item.value)
         })
     } catch (error) {

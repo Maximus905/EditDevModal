@@ -3,12 +3,11 @@ import PropTypes from 'prop-types'
 import Select from '../Base/Select'
 import RemoteDataProvider from '../Base/RemoteDataProvider'
 import check from "check-types"
-
-const URL = 'http://netcmdb-loc.rs.ru:8082/api/getDevTypes.json'
+import {DEV_TYPES} from '../../constants'
 
 class DevType extends PureComponent {
 
-    optionListUpdater = RemoteDataProvider(URL)
+    optionListUpdater = RemoteDataProvider(DEV_TYPES, 'devTypes')
     render() {
         const onChange = check.function(this.props.onChange) ? this.props.onChange('dev_type_id') : undefined
         console.log('devType', this.props.defaultSelected)

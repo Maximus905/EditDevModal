@@ -83,12 +83,12 @@ class Ports extends PureComponent {
     }
     onChangeVrf = (index) => ({value}) => {
         console.log('ONCHANGE===========', value)
-        const [vrf] = this.props.vrfData.filter((item) => {return item.__id === value})
+        const [vrf] = this.props.vrfData.filter((item) => {return item.vrf_id === value})
         // return
         if (this.state.ports && this.state.ports[index]) {
             const newPorts = cloneDeep(this.state.ports)
             newPorts[index].port_vrf_id = value
-            newPorts[index].port_vrf_name = vrf.name
+            newPorts[index].port_vrf_name = vrf.vrf_name
             this.setState({ports: newPorts})
         }
     }
@@ -112,7 +112,7 @@ class Ports extends PureComponent {
         if (check.not.array(vrfData)) return prevList
         prevVrfData = vrfData
         prevList = vrfData.map((vrf) => {
-            return {value: vrf.__id, label: vrf.name}
+            return {value: vrf.vrf_id, label: vrf.vrf_name}
         })
         return prevList
     })([], [])

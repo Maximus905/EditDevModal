@@ -2,6 +2,8 @@ import React, {Component} from 'react'
 import check from 'check-types'
 import custCss from './style.module.css'
 import axios from 'axios'
+import cloneDeep from 'lodash/cloneDeep'
+import isEqual from 'lodash/isEqual'
 import {Row, Col, Button, Modal, ModalBody, ModalFooter, ModalHeader, } from 'react-bootstrap'
 import Office from '../components/Office'
 import Region from '../components/Region'
@@ -50,24 +52,27 @@ class EditDevWindow extends Component {
       *     vendor_id: number,
       *     dev_type_id: number,
       *     dev_comment: string,
-      *     software_comment: string,
+      *     software_item_comment: string,
       *     dev_last_update: string,
       *     dev_in_use: boolean,
-      *     platform_sn: string,
-      *     platform_sn_alt: string,
+      *     platform_item_sn: string,
+      *     platform_item_sn_alt: string,
       *     is_hw: boolean,
-      *     software_ver: string,
-      *     dev_details: (Dev_details|object),
-      *     software_details: object
+      *     software_item_ver: string,
+      *     dev_details: (DevDetails|object),
+      *     software_item_details: object
       * }} DevInfo
       *
       * @typedef {{
-      *     module: string
+      *     module: string,
+      *     module_id: number,
       *     module_item_id: number,
       *     module_item_details: object,
+      *     module_item_comment: string,
       *     module_item_sn: string,
-      *     module_in_use: boolean,
-      *     module_not_found: boolean
+      *     module_item_in_use: boolean,
+      *     module_item_not_found: boolean
+      *     module_item_last_update: string
       * }} Module
       *
       * @typedef {{
@@ -77,13 +82,19 @@ class EditDevWindow extends Component {
       *
       * @typedef {{
       *     port_id: number,
+      *     port_type_id: number,
       *     port_ip: string,
       *     port_comment: string,
       *     port_details: PortDetails,
       *     port_is_mng: boolean,
       *     port_mac: string,
       *     port_mask_len: (string|number),
+      *     port_type: string,
+      *     port_last_update: string,
+      *     port_net_id: number,
+      *     port_vrf_id: number,
       *     newPort: boolean // for created ports is true
+      *     deleted: boolean // for deleted ports is true
       * }} Port
       *
       * @typedef {{
@@ -98,6 +109,13 @@ class EditDevWindow extends Component {
       *     statement: string,
       *     value: (string|number)
       * }} Filter
+      *
+      * @typedef {{
+      *     vrf_id: number,
+      *     vrf_name: string,
+      *     vrf_rd: string
+      *     vrf_comment: string
+      * }} Vrf
       */
 
       /**
@@ -166,6 +184,11 @@ class EditDevWindow extends Component {
         statement: '=',
         value: ''
     }
+    /**
+     *
+     * @type (Vrf[]|Array)
+     */
+    vrfList = []
     getDevLocation = async (location_id) => {
         try {
             console.log('LOADING')
@@ -243,7 +266,7 @@ class EditDevWindow extends Component {
     onChangeDevInfo = (key) => ({value}) => {
         const {devInfo} = this.currentState
         devInfo[key] = value
-        // console.log('DevInfo', devInfo, geoLocation)
+        console.log('DevInfo', devInfo)
     }
     onChangeDevDetails = (key) => ({value}) => {
         const {devInfo} = this.currentState
@@ -379,18 +402,18 @@ class EditDevWindow extends Component {
                         <Col md={2}><Region onChange={this.onChangeGeoLocation} defaultSelected={geoLocation.region_id}/></Col>
                         <Col md={2}><City onChange={this.onChangeGeoLocation} defaultSelected={geoLocation.city_id} filter={this.cityFilter}/></Col>
                         <Col md={4}><Office onChange={this.onChangeGeoLocation} defaultSelected={geoLocation.office_id} /></Col>
-                        {/*<Col md={4}><TextArea controlId="officeComment" onChange={this.onChangeGeoLocation('office_comment')} placeholder='Комментарий к офису' defaultValue={geoLocation.office_comment} label="Комментарий к оффису" /></Col>*/}
+                        <Col md={4}><TextArea controlId="officeComment" onChange={this.onChangeGeoLocation('office_comment')} placeholder='Комментарий к офису' defaultValue={geoLocation.office_comment} label="Комментарий к оффису" /></Col>
                         <Col md={4}><TextArea2 controlId="officeComment" disabled={this.state.loadingOfficeData} onChange={this.onChangeOfficeComment} placeholder='Комментарий к офису' value={this.state.officeComment} label="Комментарий к оффису" /></Col>
                     </Row>
                     <Row>
                         <Col md={3}><DevType onChange={this.onChangeDevInfo} defaultSelected={devInfo.dev_type_id} /></Col>
                         <Col md={3}><Platform defaultSelected={devInfo.platform_id}/></Col>
                         <Col md={3}><Software onChange={this.onChangeDevInfo}  defaultSelected={devInfo.software_id} /></Col>
-                        <Col md={3}><Input controlId='swVer' onChange={this.onChangeDevInfo('software_ver')} defaultValue={devInfo.software_ver} label="Версия ПО"/></Col>
+                        <Col md={3}><Input controlId='swVer' onChange={this.onChangeDevInfo('software_ver')} defaultValue={devInfo.software_item_ver} label="Версия ПО"/></Col>
                     </Row>
                     <Row>
-                        <Col md={3}><Input controlId='devSn' addOnPosition="left" addOnText="SN" onChange={this.onChangeDevInfo('platform_sn')} defaultValue={devInfo.platform_sn} label=" " readOnly/></Col>
-                        <Col md={3}><Input controlId='devAltSn' addOnPosition="left" addOnText="alt SN" onChange={this.onChangeDevInfo('platform_sn_alt')} defaultValue={devInfo.platform_sn_alt} label=" " /></Col>
+                        <Col md={3}><Input controlId='devSn' addOnPosition="left" addOnText="SN" onChange={this.onChangeDevInfo('platform_item_sn')} defaultValue={devInfo.platform_item_sn} label=" " readOnly/></Col>
+                        <Col md={3}><Input controlId='devAltSn' addOnPosition="left" addOnText="alt SN" onChange={this.onChangeDevInfo('platform_item_sn_alt')} defaultValue={devInfo.platform_item_sn_alt} label=" " /></Col>
                         <Col md={3}><Input controlId='hostname' addOnPosition="left" addOnText="hostname" onChange={this.onChangeDevDetails('hostname')} defaultValue={devInfo.dev_details && devInfo.dev_details.hostname} label=" " /></Col>
                         <Col md={3}><Input2 readOnly controlId='managementIP' addOnPosition="left" addOnText="management IP" onChange={()=>{}} label=" " value={this.state.mngIp} /></Col>
                     </Row>
@@ -441,16 +464,15 @@ class EditDevWindow extends Component {
                 if (devInfo && devInfo.location_id) {
                     const response2 = await this.getDevLocation(devInfo.location_id)
                     const {location = {}} = response2
-                    const {location_id: office_id, city_id, region_id, office_comment} = location
-                    geoLocation = {office_id, city_id, region_id, office_comment}
+                    geoLocation = (({office_id, city_id, region_id, office_comment}) => {return {office_id, city_id, region_id, office_comment}})(location)
                 }
                 this.initialData = {...this.initialData, devInfo, modules, ports, geoLocation}
                 this.vrfList = vrfList
                 this.currentState = {
-                    geoLocation: JSON.parse(JSON.stringify(geoLocation)),
-                    devInfo: JSON.parse(JSON.stringify(devInfo)),
-                    modules: JSON.parse(JSON.stringify(modules)),
-                    ports: JSON.parse(JSON.stringify(ports)),
+                    geoLocation: cloneDeep(geoLocation),
+                    devInfo: cloneDeep(devInfo),
+                    modules: cloneDeep(modules),
+                    ports: cloneDeep(ports),
                 }
                 console.log('didUpdate', this.initialData)
                 this.setState({devDataLoading: false, devDataReady: true})

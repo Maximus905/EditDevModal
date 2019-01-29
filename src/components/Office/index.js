@@ -3,12 +3,11 @@ import PropTypes from 'prop-types'
 import Select from '../Base/Select'
 import RemoteDataProvider from '../Base/RemoteDataProvider'
 import check from "check-types"
-
-const URL = 'http://netcmdb-loc.rs.ru:8082/api/getOffices.json'
+import {OFFICES_URL} from '../../constants'
 
 class Office extends PureComponent {
 
-    optionListUpdater = RemoteDataProvider(URL)
+    optionListUpdater = RemoteDataProvider(OFFICES_URL, 'offices')
     render() {
         const onChange = check.function(this.props.onChange) ? this.props.onChange('office_id') : undefined
         return <Select {...this.props} onChange={onChange} isAsync remoteDataFetch={this.optionListUpdater} />

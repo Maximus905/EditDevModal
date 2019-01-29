@@ -3,12 +3,12 @@ import PropTypes from 'prop-types'
 import Select from '../Base/Select'
 import RemoteDataProvider from '../Base/RemoteDataProvider'
 import check from "check-types"
+import {CITIES_URL} from '../../constants'
 
-const URL = 'http://netcmdb-loc.rs.ru:8082/api/getCities.json'
 
 class City extends PureComponent {
 
-    optionListUpdater = RemoteDataProvider(URL)
+    optionListUpdater = RemoteDataProvider(CITIES_URL, 'cities')
     render() {
         const onChange = check.function(this.props.onChange) ? this.props.onChange('city_id') : undefined
         return <Select {...this.props} onChange={onChange} isAsync remoteDataFetch={this.optionListUpdater} defaultSelected={this.props.defaultSelected} />
