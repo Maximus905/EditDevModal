@@ -183,22 +183,6 @@ class EditDevWindow extends Component {
             return {}
         }
     }
-    // getOffice = async (office_id) => {
-    //     try {
-    //         const res = await axios.get(GET_OFFICE_URL, {
-    //             params: {office_id}
-    //         })
-    //         const {data} = res
-    //         if (!data.office) {
-    //             console.log('ERROR: getOffice')
-    //             return {}
-    //         }
-    //         return data
-    //     } catch (e) {
-    //         console.log('ERROR: getOffice', e.toString())
-    //         return {}
-    //     }
-    // }
 
     managingIp = (portsInfo) => {
         console.log('mngIP==========', portsInfo)

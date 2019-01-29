@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import {FormControl, ControlLabel, FormGroup} from 'react-bootstrap'
 import check from 'check-types'
 import axios from "axios"
+import cloneDeep from 'lodash/cloneDeep'
 import css from "./style.module.css"
 
 class Select extends PureComponent {
@@ -20,6 +21,9 @@ class Select extends PureComponent {
         if (prevValue === value) return
         if (this.optionList.filter((item) => item.value === value).length === 0) return
         prevValue = value
+        console.log('========setDefaultSelected')
+        if (this.state.value === value) return
+        console.log('========setDefaultSelected SetState')
         this.setState({value: prevValue})
     })('')
 
@@ -35,17 +39,19 @@ class Select extends PureComponent {
     }
 
 
-    invokeListeners = () => {
+    invokeListeners = ((prevState) => () => {
+        if (JSON.stringify(this.state) === JSON.stringify(prevState)) return
         let {onChange} = this.props
         if (check.function(onChange)) {
             onChange = [onChange]
         }
         if (check.not.array(onChange)) return
+        prevState = cloneDeep(this.state)
         for (const subscriber of onChange) {
             console.log('SUBSCRIBER')
-            subscriber(Object.assign({}, this.state))
+            subscriber(prevState)
         }
-    }
+    })({})
 
     async updateIfNeeded() {
 

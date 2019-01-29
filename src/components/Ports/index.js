@@ -81,13 +81,14 @@ class Ports extends PureComponent {
             this.setState({ports: newPorts})
         }
     }
-    onChangeVrf = (index) => ({value, label}) => {
-        console.log('ONCHANGE===========', value, label)
-        return
+    onChangeVrf = (index) => ({value}) => {
+        console.log('ONCHANGE===========', value)
+        const [vrf] = this.props.vrfData.filter((item) => {return item.__id === value})
+        // return
         if (this.state.ports && this.state.ports[index]) {
             const newPorts = cloneDeep(this.state.ports)
             newPorts[index].port_vrf_id = value
-            newPorts[index].port_vrf_name = label
+            newPorts[index].port_vrf_name = vrf.name
             this.setState({ports: newPorts})
         }
     }
@@ -105,7 +106,21 @@ class Ports extends PureComponent {
             subscriber(Object.assign({}, this.state))
         }
     })({})
+    vrfList = ((prevVrfData, prevList) => () => {
+        const {vrfData} = this.props
+        if (JSON.stringify(prevVrfData) === JSON.stringify(vrfData))  return prevList
+        if (check.not.array(vrfData)) return prevList
+        prevVrfData = vrfData
+        prevList = vrfData.map((vrf) => {
+            return {value: vrf.__id, label: vrf.name}
+        })
+        return prevList
+    })([], [])
+    // vrfList = () => [{value: 1, label: 'global'}, {value: 2, label: 'global2'}]
     newPort = () => {
+        const vrfList = this.vrfList()
+        const vrf_id = vrfList[0] ? vrfList[0].value : null
+        const vrf_name = vrfList[0] ? vrfList[0].label : null
         return {
             port_id: null,
             port_ip: '0.0.0.0',
@@ -117,22 +132,12 @@ class Ports extends PureComponent {
             port_is_mng: false,
             port_mac: '00:00:00:00:00:00',
             port_mask_len: '',
-            port_vrf_id: null,
-            port_vrf_name: null,
+            port_vrf_id: vrf_id,
+            port_vrf_name: vrf_name,
             newPort: true,
             deleted: false
         }
     }
-    vrfList = ((prevVrfData, prevList) => () => {
-        const {vrfData} = this.props
-        if (JSON.stringify(prevVrfData) === JSON.stringify(vrfData))  return prevList
-        if (check.not.array(vrfData)) return prevList
-        prevVrfData = vrfData
-        prevList = vrfData.map((vrf) => {
-            return {value: vrf.__id, label: vrf.name}
-        })
-        return prevList
-    })([], [])
     onClickAddPort = () => {
         const updatedPorts = cloneDeep(this.state.ports)
         if (check.not.array(updatedPorts)) return
@@ -153,7 +158,7 @@ class Ports extends PureComponent {
         console.log('PORT_SET', data)
         const createdPorts = []
         const existedPorts = []
-        const vrfList = this.vrfList()
+        const defaultVrf = this.vrfList()[0] ? this.vrfList()[0].value : ''
         data.forEach((port, index) => {
             let {port_ip, port_mac, port_mask_len, port_is_mng, port_details, port_vrf_name, newPort, deleted} = port
             if (!newPort) {
@@ -180,7 +185,7 @@ class Ports extends PureComponent {
                     <tr key={index}>
                         <td><Button bsStyle="danger" bsSize="xsmall" onClick={this.onClickDelPort(index)}>Delete</Button></td>
                         <td><Input2 customSize clearMargin value={port_details && port_details.portName} onChange={this.onChangePortName(index)} /></td>
-                        <td><Select optionList={vrfList} onChange={this.onChangeVrf(index)} isAsync={false} emptyOption={false} clearMargin smallSize /></td>
+                        <td><Select optionList={this.vrfList()} defaultSelected={defaultVrf} onChange={this.onChangeVrf(index)} isAsync={false} emptyOption={false} clearMargin smallSize /></td>
                         <td>{ipCell}</td>
                         <td><Input2 customSize clearMargin value={port_mac} onChange={this.onChangePortMac(index)} /></td>
                         <td><Input2 customSize clearMargin value={port_details && port_details.description} onChange={this.onChangePortDescription(index)} /></td>
@@ -259,6 +264,12 @@ Ports.propTypes = {
         PropTypes.func,
         PropTypes.arrayOf(PropTypes.func)
     ]),
+    vrfData: PropTypes.shape({
+        __id: PropTypes.number,
+        name: PropTypes.string,
+        rd: PropTypes.string,
+        comment: PropTypes.string,
+    })
 }
 
 export default Ports
