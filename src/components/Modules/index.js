@@ -12,7 +12,6 @@ class Modules extends PureComponent {
         const {data} = this.props
         if (check.not.array(data)) return
         return data.map((module, index) => {
-            console.log('MODULE=========', module)
             const button = <InUseButton defaultValue={module.module_in_use} onChange={this.props.onChange('module_in_use')(index)} />
             return (
                 <tr key={index}>

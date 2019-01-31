@@ -135,7 +135,10 @@ class EditDevWindow extends Component {
         mngPorts: [],
         mngIp: '',
         officeComment: '',
-        loadingOfficeData: false
+        loadingOfficeData: false,
+        saving: false,
+        region_id: '',
+        city_id: ''
     }
     /**
      * @type {{
@@ -191,13 +194,12 @@ class EditDevWindow extends Component {
     vrfList = []
     getDevLocation = async (location_id) => {
         try {
-            console.log('LOADING')
             const res = await axios.get(DEV_LOCATION_URL, {
                 params: {location_id}
             })
             const {data} = res
             if (!data.location) {
-                console.log('ERROR: getDevLocation')
+                console.log('ERROR: getDevLocation for loc_id ', location_id)
                 return {}
             }
             return data
@@ -208,7 +210,6 @@ class EditDevWindow extends Component {
     }
 
     managingIp = (portsInfo) => {
-        console.log('mngIP==========', portsInfo)
         if (!check.array(portsInfo)) return
         const res = portsInfo.filter((port) => port.port_is_mng).map((port) => port.port_ip)
         return res.join(', ')
@@ -217,9 +218,19 @@ class EditDevWindow extends Component {
     handleClose() {
         this.setState({ show: false });
     }
+    dataValidate = (devData) => {
+        const errors = []
+        if (check.not.number(devData.geoLocation.office_id)) errors.push('Не указан оффис')
+        return errors
+    }
     handleSubmit = async() => {
-        console.log('SUBMIT', this.currentState)
+        const errors = this.dataValidate(this.currentState)
+        if (check.nonEmptyArray(errors)) {
+            alert(errors.join("\n"))
+            return
+        }
         try {
+            this.setState({saving: true})
             /**
              * @typedef {{
              *     code: number,
@@ -231,10 +242,13 @@ class EditDevWindow extends Component {
              */
             const res = await axios.post(DEV_SUBMIT_URL, this.currentState)
             const {data} = res
-            if (data.errors) throw data.errors
-            console.log('SAVE RESULT', res)
+            if (data.errors) throw data.errors.join("\n")
+            this.setState({saving: false})
+            console.log('SAVE RESULT', data.result)
         } catch (e) {
             console.log('ERROR: ', e)
+            alert(e)
+            this.setState({saving: false})
         }
     }
 
@@ -245,6 +259,9 @@ class EditDevWindow extends Component {
     onChangeGeoLocation = (key) => async ({value}) => {
         const {geoLocation} = this.currentState
         geoLocation[key] = value
+        if (key === 'region_id' || key === 'city_id') {
+            this.setState({[key]: value})
+        }
         if (key === 'office_id') {
             this.onChangeDevInfo('location_id')({value})
             this.setState({loadingOfficeData: true})
@@ -256,7 +273,6 @@ class EditDevWindow extends Component {
             geoLocation.office_comment = office_comment
             this.setState({officeComment: office_comment, loadingOfficeData: false})
         }
-        console.log('geolocation', geoLocation)
     }
     onChangeOfficeComment = (e) => {
         const {geoLocation} = this.currentState
@@ -266,7 +282,6 @@ class EditDevWindow extends Component {
     onChangeDevInfo = (key) => ({value}) => {
         const {devInfo} = this.currentState
         devInfo[key] = value
-        console.log('DevInfo', devInfo)
     }
     onChangeDevDetails = (key) => ({value}) => {
         const {devInfo} = this.currentState
@@ -278,10 +293,8 @@ class EditDevWindow extends Component {
         if (modules[idx] && modules[idx][key] !== value) {
             modules[idx][key] = value
         }
-        // console.log('Modules', modules)
     }
     changeMngIpString = (ports) => {
-        console.log('mngIP==========', ports)
         if (!check.array(ports)) return
         const res = ports.filter((port) => port.port_is_mng).map((port) => port.port_ip)
         if (res.length > 0) {
@@ -294,14 +307,12 @@ class EditDevWindow extends Component {
         })
         this.currentState.ports = ports
         this.changeMngIpString(this.currentState.ports)
-        console.log('Ports', ports)
     }
     onChangeDevLocation = (key) => ({value}) => {
         if (value === undefined) return
         const {devInfo} = this.currentState
         if (!(devInfo && devInfo.dev_details && devInfo.dev_details.site))  return
         devInfo.dev_details.site[key] = value
-        console.log('SITE', devInfo.dev_details.site)
     }
 
     fetchDeviceData = async (id) => {
@@ -368,21 +379,20 @@ class EditDevWindow extends Component {
             return []
         }
     }
-    submitForm = () => {
-        console.log('SUBMIT', this.currentState)
-    }
 
     memoizedCityFilter = ((prevFilter) => () => {
-        // console.log(prevFilter.region_id === this.state.region_id ? 'old_city_filter' : 'new_city_filter')
-        if (prevFilter.region_id !== this.state.region_id) prevFilter = Object.assign({}, this.cityFilter, {region_id: this.state.region_id})
-        return prevFilter
-    })('')
+        const newCityFilter = Object.assign({}, this.cityFilter, {value: this.state.region_id})
+        if (!isEqual(newCityFilter, prevFilter)) prevFilter = newCityFilter
+        return [prevFilter]
+    })([])
 
     memoizedOfficeFilter = ((prevFilter) => () => {
-        // console.log(prevFilter.city_id === this.state.city_id ? 'old_city_filter' : 'new_city_filter')
-        if (prevFilter.city_id !== this.state.city_id) prevFilter = Object.assign({}, this.officeFilter, {city_id: this.state.city_id})
+        const newCityFilter = Object.assign({}, this.cityFilter, {value: this.state.region_id})
+        const newOfficeFilter = Object.assign({}, this.officeFilter, {value: this.state.city_id})
+        const newFilter = [newCityFilter, newOfficeFilter]
+        if (!isEqual(prevFilter, newFilter)) prevFilter = newFilter
         return prevFilter
-    })('')
+    })([])
 
     render() {
         const {geoLocation, devInfo, modules, ports} = this.initialData
@@ -390,7 +400,6 @@ class EditDevWindow extends Component {
             const {floor, row, rack, unit, rackSide} = devInfo && devInfo.dev_details && devInfo.dev_details.site ? devInfo.dev_details.site : {}
             return {floor, row, rack, unit, rackSide}
         })()
-        console.log('EditDevWindow render', this.initialData.devInfo, 'ready', this.state.devDataReady, 'loading', this.state.devDataLoading, this.state.show, this.state.devId, 'defSelected', geoLocation.region_id, devSite)
 
         return (
             <Modal show={this.state.show} onHide={this.handleClose} bsSize="large" >
@@ -399,10 +408,10 @@ class EditDevWindow extends Component {
                 </ModalHeader>
                 <ModalBody className={custCss.modalBody} >
                     <Row>
-                        <Col md={2}><Region onChange={this.onChangeGeoLocation} defaultSelected={geoLocation.region_id}/></Col>
-                        <Col md={2}><City onChange={this.onChangeGeoLocation} defaultSelected={geoLocation.city_id} filter={this.cityFilter}/></Col>
-                        <Col md={4}><Office onChange={this.onChangeGeoLocation} defaultSelected={geoLocation.office_id} /></Col>
-                        <Col md={4}><TextArea controlId="officeComment" onChange={this.onChangeGeoLocation('office_comment')} placeholder='Комментарий к офису' defaultValue={geoLocation.office_comment} label="Комментарий к оффису" /></Col>
+                        <Col md={2}><Region onChange={this.onChangeGeoLocation('region_id')} defaultSelected={geoLocation.region_id}/></Col>
+                        <Col md={2}><City onChange={this.onChangeGeoLocation('city_id')} defaultSelected={geoLocation.city_id} filter={this.memoizedCityFilter()}/></Col>
+                        <Col md={4}><Office onChange={this.onChangeGeoLocation} defaultSelected={geoLocation.office_id} filter={this.memoizedOfficeFilter()}/></Col>
+                        {/*<Col md={4}><TextArea controlId="officeComment" onChange={this.onChangeGeoLocation('office_comment')} placeholder='Комментарий к офису' defaultValue={geoLocation.office_comment} label="Комментарий к оффису" /></Col>*/}
                         <Col md={4}><TextArea2 controlId="officeComment" disabled={this.state.loadingOfficeData} onChange={this.onChangeOfficeComment} placeholder='Комментарий к офису' value={this.state.officeComment} label="Комментарий к оффису" /></Col>
                     </Row>
                     <Row>
@@ -432,8 +441,15 @@ class EditDevWindow extends Component {
                     </Row>
                 </ModalBody>
                 <ModalFooter>
-                    <Button onClick={this.handleClose} bsStyle="danger" >Отмена</Button>
-                    <Button onClick={this.handleSubmit} bsStyle="success">Сохранить</Button>
+                    <Row>
+                        <Col md={8}>
+                            <h3 align="center" style={{margin: 0}}>{this.state.saving ? 'Сохранение данных...' : ''}</h3>
+                        </Col>
+                        <Col md={4}>
+                            <Button onClick={this.handleClose} bsStyle="danger" >Отмена</Button>
+                            <Button onClick={this.handleSubmit} bsStyle="success">Сохранить</Button>
+                        </Col>
+                    </Row>
                 </ModalFooter>
             </Modal>
         )
@@ -474,7 +490,6 @@ class EditDevWindow extends Component {
                     modules: cloneDeep(modules),
                     ports: cloneDeep(ports),
                 }
-                console.log('didUpdate', this.initialData)
                 this.setState({devDataLoading: false, devDataReady: true})
             } catch (e) {
                 console.log('Loading dev data ERROR', e.toString())

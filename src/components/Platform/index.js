@@ -22,23 +22,18 @@ Platform.propTypes = {
         PropTypes.func,
         PropTypes.arrayOf(PropTypes.func)
     ]),
-    filter: PropTypes.shape({
+    filter: PropTypes.arrayOf(PropTypes.shape({
         accessor: PropTypes.string,
         statement: PropTypes.string,
         value: PropTypes.oneOfType([
             PropTypes.number,
             PropTypes.string
         ])
-    })
+    }))
 }
 Platform.defaultProps = {
     label: 'Платформа',
     controlId: 'platformSelector',
-    filter: {
-        accessor: '',
-        statement: '',
-        value: ''
-    }
 }
 
 export default Platform

@@ -10,7 +10,6 @@ class DevType extends PureComponent {
     optionListUpdater = RemoteDataProvider(DEV_TYPES, 'devTypes')
     render() {
         const onChange = check.function(this.props.onChange) ? this.props.onChange('dev_type_id') : undefined
-        console.log('devType', this.props.defaultSelected)
         return <Select {...this.props} onChange={onChange} isAsync remoteDataFetch={this.optionListUpdater} />
     }
 }
@@ -25,23 +24,18 @@ DevType.propTypes = {
         PropTypes.func,
         PropTypes.arrayOf(PropTypes.func)
     ]),
-    filter: PropTypes.shape({
+    filter: PropTypes.arrayOf(PropTypes.shape({
         accessor: PropTypes.string,
         statement: PropTypes.string,
         value: PropTypes.oneOfType([
             PropTypes.number,
             PropTypes.string
         ])
-    })
+    }))
 }
 DevType.defaultProps = {
     label: 'Тип(роль)',
     controlId: 'devTypeSelector',
-    filter: {
-        accessor: '',
-        statement: '',
-        value: ''
-    }
 }
 
 export default DevType

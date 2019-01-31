@@ -21,7 +21,6 @@ class Ports extends PureComponent {
             return {...port, port_mask_len: (port.port_mask_len === null ? '' : port.port_mask_len)}
         })
         if (isEqual(prevState, newState)) return
-        console.log('SET DEFAULT', newState)
 
         prevState = newState
         this.setState({ports: newState})
@@ -82,7 +81,6 @@ class Ports extends PureComponent {
         }
     }
     onChangeVrf = (index) => ({value}) => {
-        console.log('ONCHANGE===========', value)
         const [vrf] = this.props.vrfData.filter((item) => {return item.vrf_id === value})
         // return
         if (this.state.ports && this.state.ports[index]) {
@@ -116,11 +114,18 @@ class Ports extends PureComponent {
         })
         return prevList
     })([], [])
+    vrfName = (vrfId) => {
+        if (vrfId === null || vrfId === undefined) return ''
+        const vrfData = this.props.vrfData || []
+        const [vrf] = vrfData.filter((vrf) => {
+            return vrf && vrf.vrf_id && vrf.vrf_id === vrfId
+        })
+        return vrf.vrf_name || ''
+    }
     // vrfList = () => [{value: 1, label: 'global'}, {value: 2, label: 'global2'}]
     newPort = () => {
         const vrfList = this.vrfList()
         const vrf_id = vrfList[0] ? vrfList[0].value : null
-        const vrf_name = vrfList[0] ? vrfList[0].label : null
         return {
             port_id: null,
             port_ip: '0.0.0.0',
@@ -133,7 +138,7 @@ class Ports extends PureComponent {
             port_mac: '00:00:00:00:00:00',
             port_mask_len: '',
             port_vrf_id: vrf_id,
-            port_vrf_name: vrf_name,
+            // port_vrf_name: vrf_name,
             newPort: true,
             deleted: false
         }
@@ -155,12 +160,11 @@ class Ports extends PureComponent {
     portsSet = () => {
         const data = this.state.ports
         if (check.not.array(data)) return
-        console.log('PORT_SET', data)
         const createdPorts = []
         const existedPorts = []
         const defaultVrf = this.vrfList()[0] ? this.vrfList()[0].value : ''
         data.forEach((port, index) => {
-            let {port_ip, port_mac, port_mask_len, port_is_mng, port_details, port_vrf_name, newPort, deleted} = port
+            let {port_ip, port_mac, port_mask_len, port_is_mng, port_details, port_vrf_id, newPort, deleted} = port
             if (!newPort) {
                 const ipCell = port_is_mng ?
                     <IpAddressEdit ip={port_ip} mask={port_mask_len } onChangeIp={this.onChangeIp(index)} onChangeMask={this.onChangeMask(index)} /> :
@@ -169,7 +173,7 @@ class Ports extends PureComponent {
                     <tr key={index}>
                         <td>{index + 1}</td>
                         <td>{port_details && port_details.portName}</td>
-                        <td>{port_vrf_name}</td>
+                        <td>{this.vrfName(port_vrf_id)}</td>
                         <td>{ipCell}</td>
                         <td>{port_mac}</td>
                         <td>{port_details && port_details.description}</td>
@@ -235,7 +239,6 @@ class Ports extends PureComponent {
     }
 
     componentDidMount() {
-        // console.log('Ports did mount===============', this.props.data)
         this.setDefaultState(this.props.data)
     }
 
@@ -258,18 +261,17 @@ Ports.propTypes = {
         }),
         port_comment: PropTypes.string,
         port_vrf_id: PropTypes.number,
-        port_vrf_name: PropTypes.string
     })),
     onChange: PropTypes.oneOfType([
         PropTypes.func,
         PropTypes.arrayOf(PropTypes.func)
     ]),
-    vrfData: PropTypes.shape({
-        __id: PropTypes.number,
-        name: PropTypes.string,
-        rd: PropTypes.string,
-        comment: PropTypes.string,
-    })
+    vrfData: PropTypes.arrayOf(PropTypes.shape({
+        vrf_id: PropTypes.number,
+        vrf_name: PropTypes.string,
+        vrf_rd: PropTypes.string,
+        vrf_comment: PropTypes.string,
+    }))
 }
 
 export default Ports

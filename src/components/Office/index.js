@@ -24,23 +24,23 @@ Office.propTypes = {
         PropTypes.func,
         PropTypes.arrayOf(PropTypes.func)
     ]),
-    filter: PropTypes.shape({
+    filter: PropTypes.arrayOf(PropTypes.shape({
         accessor: PropTypes.string,
         statement: PropTypes.string,
         value: PropTypes.oneOfType([
             PropTypes.number,
             PropTypes.string
         ])
-    })
+    }))
 }
 Office.defaultProps = {
     label: 'Офис',
     controlId: 'officeSelector',
-    filter: {
-        accessor: 'city_id',
-        statement: '',
-        value: ''
-    }
+    // filter: {
+    //     accessor: 'city_id',
+    //     statement: '',
+    //     value: ''
+    // }
 }
 
 export default Office

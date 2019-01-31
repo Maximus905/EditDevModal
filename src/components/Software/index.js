@@ -10,7 +10,6 @@ class Software extends PureComponent {
     optionListUpdater = RemoteDataProvider(SOFTWARE_LIST, 'softwareList')
     render() {
         const onChange = check.function(this.props.onChange) ? this.props.onChange('software_id') : undefined
-        console.log('devType', this.props.defaultSelected)
         return <Select {...this.props} isAsync remoteDataFetch={this.optionListUpdater} onChange={onChange} />
     }
 }
@@ -25,23 +24,18 @@ Software.propTypes = {
         PropTypes.func,
         PropTypes.arrayOf(PropTypes.func)
     ]),
-    filter: PropTypes.shape({
+    filter: PropTypes.arrayOf(PropTypes.shape({
         accessor: PropTypes.string,
         statement: PropTypes.string,
         value: PropTypes.oneOfType([
             PropTypes.number,
             PropTypes.string
         ])
-    })
+    }))
 }
 Software.defaultProps = {
     label: 'ПО',
     controlId: 'softwareSelector',
-    filter: {
-        accessor: '',
-        statement: '',
-        value: ''
-    }
 }
 
 export default Software

@@ -51,7 +51,6 @@ class EditableTag extends PureComponent {
     }
 
     render() {
-        console.log('render')
         const html = this.convertValueToHtml(this.props.stateless ? this.props.value : this.state.value)
         return (
             <ContentEditable html={html} innerRef={this.contentEditable} onChange={this.handleOnChange} tagName={this.props.tagName} style={{'wordWrap': 'break-word'}} className={this.props.className} disabled={this.props.disabled} />
