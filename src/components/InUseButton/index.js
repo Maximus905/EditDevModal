@@ -12,7 +12,7 @@ class InUseButton extends PureComponent {
     }
 
     setDefaultValue = ((prevValue) => (value) => {
-        if (check.nonEmptyString(value) && prevValue !== value) {
+        if (prevValue !== value) {
             prevValue = value
             this.setState({value})
         }

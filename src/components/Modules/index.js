@@ -12,11 +12,11 @@ class Modules extends PureComponent {
         const {data} = this.props
         if (check.not.array(data)) return
         return data.map((module, index) => {
-            const button = <InUseButton defaultValue={module.module_in_use} onChange={this.props.onChange('module_in_use')(index)} />
+            const button = <InUseButton defaultValue={module.module_item_in_use} onChange={this.props.onChange('module_item_in_use')(index)} />
             return (
                 <tr key={index}>
                     <td>{index + 1}</td>
-                    <td className={module.module_not_found ? 'bg-danger' : null}>{module.module}</td>
+                    <td className={module.module_item_not_found ? 'bg-danger' : null}>{module.module}</td>
                     <td>{module.module_item_sn}</td>
                     <EditableTag disabled={false} tagName={'td'} value={module.module_item_comment} onChange={this.props.onChange('module_item_comment')(index)}/>
                     <td align="center" valign="middle">{button}</td>

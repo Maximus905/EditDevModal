@@ -9,7 +9,7 @@ class Region extends PureComponent {
 
     optionListUpdater = RemoteDataProvider(REGIONS_URL, 'regions')
     render() {
-        return <Select {...this.props} onChange={this.props.onChange} isAsync remoteDataFetch={this.optionListUpdater} defaultSelected={this.props.defaultSelected} />
+        return <Select {...this.props} isAsync remoteDataFetch={this.optionListUpdater} />
     }
 }
 

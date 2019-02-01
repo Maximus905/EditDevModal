@@ -21,10 +21,14 @@ class TextArea extends PureComponent {
         }
     }
     setDefaultValue = ((prevValue) => (value) => {
-        if (check.nonEmptyString(value) && prevValue !== value) {
-            prevValue = value
-            this.setState({value})
-        }
+        if (value === undefined || value === null) return
+        if (prevValue === value) return
+        prevValue = value
+        this.setState({value})
+        // if (check.nonEmptyString(value) && prevValue !== value) {
+        //     prevValue = value
+        //     this.setState({value})
+        // }
     })('')
 
     render() {

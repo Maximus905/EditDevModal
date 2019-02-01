@@ -10,7 +10,7 @@ class TextArea2 extends PureComponent {
         return (
             <FormGroup controlId="formControlsTextarea">
                 {controlLabel}
-                <FormControl componentClass="textarea" placeholder={this.props.placeholder} onChange={this.props.onChange} value={this.props.value} />
+                <FormControl componentClass="textarea" placeholder={this.props.placeholder} onChange={this.props.onChange} value={this.props.value} disabled={this.props.disabled} />
             </FormGroup>
         )
     }

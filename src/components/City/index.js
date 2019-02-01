@@ -9,7 +9,7 @@ class City extends PureComponent {
 
     optionListUpdater = RemoteDataProvider(CITIES_URL, 'cities')
     render() {
-        return <Select {...this.props} onChange={this.props.onChange} isAsync remoteDataFetch={this.optionListUpdater} defaultSelected={this.props.defaultSelected} filter={this.props.filter} />
+        return <Select {...this.props} isAsync remoteDataFetch={this.optionListUpdater} />
     }
 }
 

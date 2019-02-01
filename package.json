@@ -2,7 +2,7 @@
   "name": "modal",
   "version": "0.1.0",
   "private": true,
-  "homepage": "http://netcmdb.rs.ru/react",
+  "homepage": "http://netcmdb.rs.ru/react/editDevModal",
   "dependencies": {
     "axios": "^0.18.0",
     "bootstrap": "3",

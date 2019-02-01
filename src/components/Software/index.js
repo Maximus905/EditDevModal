@@ -2,15 +2,13 @@ import React, {PureComponent} from 'react'
 import PropTypes from 'prop-types'
 import Select from '../Base/Select'
 import RemoteDataProvider from '../Base/RemoteDataProvider'
-import check from "check-types"
 import {SOFTWARE_LIST} from '../../constants'
 
 class Software extends PureComponent {
 
     optionListUpdater = RemoteDataProvider(SOFTWARE_LIST, 'softwareList')
     render() {
-        const onChange = check.function(this.props.onChange) ? this.props.onChange('software_id') : undefined
-        return <Select {...this.props} isAsync remoteDataFetch={this.optionListUpdater} onChange={onChange} />
+        return <Select {...this.props} isAsync remoteDataFetch={this.optionListUpdater} />
     }
 }
 

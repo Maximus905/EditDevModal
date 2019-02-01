@@ -19,15 +19,16 @@ import CheckBox from '../components/Base/CheckBox'
 import Modules from '../components/Modules'
 import Ports from '../components/Ports'
 import DevLocation from '../components/DevLocation'
-// import RemoteDataProvider from "../components/Base/RemoteDataProvider"
 import {DEV_DATA_URL, DEV_LOCATION_URL, DEV_MODULES_DATA_URL, DEV_PORTS_DATA_URL, DEV_SUBMIT_URL, VRF_LIST_URL} from'../constants'
 
+import ContentEditable from "react-contenteditable"
+
 class EditDevWindow extends Component {
-    constructor(props, context) {
-        super(props, context);
-        this.handleShow = this.handleShow.bind(this);
-        this.handleClose = this.handleClose.bind(this);
-    }
+    // constructor(props, context) {
+    //     super(props, context);
+    //     // this.handleShow = this.handleShow.bind(this);
+    //     // this.handleClose = this.handleClose.bind(this);
+    // }
      /**
       * @typedef {{
       *      floor: (number|string),
@@ -136,9 +137,10 @@ class EditDevWindow extends Component {
         mngIp: '',
         officeComment: '',
         loadingOfficeData: false,
+        officeDataInvalidate: true,
         saving: false,
         region_id: '',
-        city_id: ''
+        city_id: '',
     }
     /**
      * @type {{
@@ -189,17 +191,28 @@ class EditDevWindow extends Component {
     }
     /**
      *
+     * @type Site siteInfo
+     */
+    siteInfo = {
+        floor: '',
+        row: '',
+        rack: '',
+        unit: '',
+        rackSide: '',
+    }
+    /**
+     *
      * @type (Vrf[]|Array)
      */
     vrfList = []
     getDevLocation = async (location_id) => {
         try {
             const res = await axios.get(DEV_LOCATION_URL, {
-                params: {location_id}
+                params: {location_id: location_id}
             })
             const {data} = res
             if (!data.location) {
-                console.log('ERROR: getDevLocation for loc_id ', location_id)
+                console.log('ERROR: getDevLocation for loc_id ', data, location_id)
                 return {}
             }
             return data
@@ -214,8 +227,11 @@ class EditDevWindow extends Component {
         const res = portsInfo.filter((port) => port.port_is_mng).map((port) => port.port_ip)
         return res.join(', ')
     }
+    handleShow = () => {
+        this.setState({ show: true });
+    }
 
-    handleClose() {
+    handleClose = () => {
         this.setState({ show: false });
     }
     dataValidate = (devData) => {
@@ -225,12 +241,14 @@ class EditDevWindow extends Component {
     }
     handleSubmit = async() => {
         const errors = this.dataValidate(this.currentState)
+        console.log('save', this.currentState)
         if (check.nonEmptyArray(errors)) {
             alert(errors.join("\n"))
             return
         }
         try {
             this.setState({saving: true})
+            // console.log('currentState', this.currentState)
             /**
              * @typedef {{
              *     code: number,
@@ -245,15 +263,17 @@ class EditDevWindow extends Component {
             if (data.errors) throw data.errors.join("\n")
             this.setState({saving: false})
             console.log('SAVE RESULT', data.result)
+            if (window.updateDevTable) {
+                window.updateDevTable()
+            } else {
+                console.log('function updateDevTable not found')
+            }
+            setTimeout(() => {this.handleClose()}, 700)
         } catch (e) {
             console.log('ERROR: ', e)
             alert(e)
             this.setState({saving: false})
         }
-    }
-
-    handleShow() {
-        this.setState({ show: true });
     }
 
     onChangeGeoLocation = (key) => async ({value}) => {
@@ -264,14 +284,21 @@ class EditDevWindow extends Component {
         }
         if (key === 'office_id') {
             this.onChangeDevInfo('location_id')({value})
-            this.setState({loadingOfficeData: true})
-            const res = await this.getDevLocation(value)
-            const {location = {}} = res
-            let {office_comment} = location
-            office_comment = office_comment ? office_comment : ''
-            const {geoLocation} = this.currentState
-            geoLocation.office_comment = office_comment
-            this.setState({officeComment: office_comment, loadingOfficeData: false})
+            if (check.emptyString(value)) {
+                const {geoLocation} = this.currentState
+                geoLocation.office_comment = ''
+                this.setState({officeDataInvalidate: true, officeComment: ''})
+            } else {
+                this.setState({officeDataInvalidate: true, loadingOfficeData: true})
+                const res = await this.getDevLocation(value)
+                const {location = {}} = res
+                let {office_comment} = location
+                office_comment = office_comment ? office_comment : ''
+                const {geoLocation} = this.currentState
+                geoLocation.office_comment = office_comment
+                this.setState({officeComment: office_comment, officeDataInvalidate: false,loadingOfficeData: false})
+            }
+
         }
     }
     onChangeOfficeComment = (e) => {
@@ -282,6 +309,7 @@ class EditDevWindow extends Component {
     onChangeDevInfo = (key) => ({value}) => {
         const {devInfo} = this.currentState
         devInfo[key] = value
+        console.log(key, this.currentState)
     }
     onChangeDevDetails = (key) => ({value}) => {
         const {devInfo} = this.currentState
@@ -293,6 +321,7 @@ class EditDevWindow extends Component {
         if (modules[idx] && modules[idx][key] !== value) {
             modules[idx][key] = value
         }
+        console.log('MODULES', modules)
     }
     changeMngIpString = (ports) => {
         if (!check.array(ports)) return
@@ -309,9 +338,15 @@ class EditDevWindow extends Component {
         this.changeMngIpString(this.currentState.ports)
     }
     onChangeDevLocation = (key) => ({value}) => {
-        if (value === undefined) return
+        if (value === undefined || !this.state.devDataReady) return
         const {devInfo} = this.currentState
-        if (!(devInfo && devInfo.dev_details && devInfo.dev_details.site))  return
+        if (!devInfo)  {
+            return
+        }
+        if (!devInfo.dev_details) devInfo.dev_details = {}
+        if ( !devInfo.dev_details.site) {
+            devInfo.dev_details.site = this.siteInfo
+        }
         devInfo.dev_details.site[key] = value
     }
 
@@ -396,6 +431,7 @@ class EditDevWindow extends Component {
 
     render() {
         const {geoLocation, devInfo, modules, ports} = this.initialData
+        const {devDataReady} = this.state
         const devSite = (() => {
             const {floor, row, rack, unit, rackSide} = devInfo && devInfo.dev_details && devInfo.dev_details.site ? devInfo.dev_details.site : {}
             return {floor, row, rack, unit, rackSide}
@@ -404,41 +440,50 @@ class EditDevWindow extends Component {
         return (
             <Modal show={this.state.show} onHide={this.handleClose} bsSize="large" >
                 <ModalHeader closeButton>
-                    <Modal.Title>Modal heading. Device ID: {this.state.devId} </Modal.Title>
+                    <Modal.Title>Редактирование устройства</Modal.Title>
                 </ModalHeader>
                 <ModalBody className={custCss.modalBody} >
-                    <Row>
-                        <Col md={2}><Region onChange={this.onChangeGeoLocation('region_id')} defaultSelected={geoLocation.region_id}/></Col>
-                        <Col md={2}><City onChange={this.onChangeGeoLocation('city_id')} defaultSelected={geoLocation.city_id} filter={this.memoizedCityFilter()}/></Col>
-                        <Col md={4}><Office onChange={this.onChangeGeoLocation} defaultSelected={geoLocation.office_id} filter={this.memoizedOfficeFilter()}/></Col>
-                        {/*<Col md={4}><TextArea controlId="officeComment" onChange={this.onChangeGeoLocation('office_comment')} placeholder='Комментарий к офису' defaultValue={geoLocation.office_comment} label="Комментарий к оффису" /></Col>*/}
-                        <Col md={4}><TextArea2 controlId="officeComment" disabled={this.state.loadingOfficeData} onChange={this.onChangeOfficeComment} placeholder='Комментарий к офису' value={this.state.officeComment} label="Комментарий к оффису" /></Col>
-                    </Row>
-                    <Row>
-                        <Col md={3}><DevType onChange={this.onChangeDevInfo} defaultSelected={devInfo.dev_type_id} /></Col>
-                        <Col md={3}><Platform defaultSelected={devInfo.platform_id}/></Col>
-                        <Col md={3}><Software onChange={this.onChangeDevInfo}  defaultSelected={devInfo.software_id} /></Col>
-                        <Col md={3}><Input controlId='swVer' onChange={this.onChangeDevInfo('software_ver')} defaultValue={devInfo.software_item_ver} label="Версия ПО"/></Col>
-                    </Row>
-                    <Row>
-                        <Col md={3}><Input controlId='devSn' addOnPosition="left" addOnText="SN" onChange={this.onChangeDevInfo('platform_item_sn')} defaultValue={devInfo.platform_item_sn} label=" " readOnly/></Col>
-                        <Col md={3}><Input controlId='devAltSn' addOnPosition="left" addOnText="alt SN" onChange={this.onChangeDevInfo('platform_item_sn_alt')} defaultValue={devInfo.platform_item_sn_alt} label=" " /></Col>
-                        <Col md={3}><Input controlId='hostname' addOnPosition="left" addOnText="hostname" onChange={this.onChangeDevDetails('hostname')} defaultValue={devInfo.dev_details && devInfo.dev_details.hostname} label=" " /></Col>
-                        <Col md={3}><Input2 readOnly controlId='managementIP' addOnPosition="left" addOnText="management IP" onChange={()=>{}} label=" " value={this.state.mngIp} /></Col>
-                    </Row>
-                    <Row>
-                        <Col md={6}><TextArea controlId="deviceComment" onChange={this.onChangeDevInfo('dev_comment')} placeholder='Комментарий к устройству' defaultValue={devInfo.dev_comment} label="Коментарий к устройству" /></Col>
-                    </Row>
-                    <Row><Col md={6}><CheckBox title="Устройство используется" onChange={this.onChangeDevInfo('dev_in_use')} checked={devInfo.dev_in_use} >Устройство используется</CheckBox></Col></Row>
+                    {/*<table>*/}
+                        {/*<tbody>*/}
+                        {/*<tr>*/}
+                            {/*<ContentEditable tagName={"td"} html={'qwert'} onChange={(e) => console.log('edit', e.target.value)}/>*/}
+                            {/*<td>test</td>*/}
+                        {/*</tr>*/}
+                        {/*</tbody>*/}
+                    {/*</table>*/}
+
+
+                    {/*<Row>*/}
+                        {/*<Col md={2}><Region onChange={this.onChangeGeoLocation('region_id')} defaultSelected={geoLocation.region_id} disabled={!devDataReady}/></Col>*/}
+                        {/*<Col md={2}><City onChange={this.onChangeGeoLocation('city_id')} defaultSelected={geoLocation.city_id} filter={this.memoizedCityFilter()} disabled={!devDataReady}/></Col>*/}
+                        {/*<Col md={4}><Office onChange={this.onChangeGeoLocation('office_id')} defaultSelected={geoLocation.office_id} filter={this.memoizedOfficeFilter()} disabled={!devDataReady}/></Col>*/}
+                        {/*<Col md={4}><TextArea2 controlId="officeComment" disabled={this.state.officeDataInvalidate || !devDataReady} onChange={this.onChangeOfficeComment} placeholder='Комментарий к офису' value={this.state.officeComment} label="Комментарий к оффису" /></Col>*/}
+                    {/*</Row>*/}
+                    {/*<Row>*/}
+                        {/*<Col md={3}><DevType onChange={this.onChangeDevInfo('dev_type_id')} defaultSelected={devInfo.dev_type_id} /></Col>*/}
+                        {/*<Col md={3}><Platform onChange={this.onChangeDevInfo('platform_id')} defaultSelected={devInfo.platform_id}/></Col>*/}
+                        {/*<Col md={3}><Software onChange={this.onChangeDevInfo('software_id')}  defaultSelected={devInfo.software_id} /></Col>*/}
+                        {/*<Col md={3}><Input controlId='swVer' onChange={this.onChangeDevInfo('software_item_ver')} defaultValue={devInfo.software_item_ver} label="Версия ПО"/></Col>*/}
+                    {/*</Row>*/}
+                    {/*<Row>*/}
+                        {/*<Col md={3}><Input controlId='devSn' addOnPosition="left" addOnText="SN" onChange={this.onChangeDevInfo('platform_item_sn')} defaultValue={devInfo.platform_item_sn} label=" " readOnly/></Col>*/}
+                        {/*<Col md={3}><Input controlId='devAltSn' addOnPosition="left" addOnText="alt SN" onChange={this.onChangeDevInfo('platform_item_sn_alt')} defaultValue={devInfo.platform_item_sn_alt} label=" " /></Col>*/}
+                        {/*<Col md={3}><Input controlId='hostname' addOnPosition="left" addOnText="hostname" onChange={this.onChangeDevDetails('hostname')} defaultValue={devInfo.dev_details && devInfo.dev_details.hostname} label=" " /></Col>*/}
+                        {/*<Col md={3}><Input2 readOnly controlId='managementIP' addOnPosition="left" addOnText="management IP" onChange={()=>{}} label=" " value={this.state.mngIp} /></Col>*/}
+                    {/*</Row>*/}
+                    {/*<Row>*/}
+                        {/*<Col md={6}><TextArea controlId="deviceComment" onChange={this.onChangeDevInfo('dev_comment')} placeholder='Комментарий к устройству' defaultValue={devInfo.dev_comment} label="Коментарий к устройству" /></Col>*/}
+                    {/*</Row>*/}
+                    {/*<Row><Col md={6}><CheckBox title="Устройство используется" onChange={this.onChangeDevInfo('dev_in_use')} checked={devInfo.dev_in_use} >Устройство используется</CheckBox></Col></Row>*/}
                     <Row>
                         <Col md={10}><Modules data={modules} onChange={this.onChangeModule} /></Col>
                     </Row>
-                    <Ports data={ports} vrfData={this.vrfList} onChange={this.onChangePorts} />
-                    <Row>
-                        <Col md={10}>
-                            <DevLocation {...devSite} onChange={this.onChangeDevLocation} />
-                        </Col>
-                    </Row>
+                    {/*<Ports data={ports} vrfData={this.vrfList} onChange={this.onChangePorts} />*/}
+                    {/*<Row>*/}
+                        {/*<Col md={10}>*/}
+                            {/*<DevLocation {...devSite} onChange={this.onChangeDevLocation} />*/}
+                        {/*</Col>*/}
+                    {/*</Row>*/}
                 </ModalBody>
                 <ModalFooter>
                     <Row>
@@ -446,8 +491,8 @@ class EditDevWindow extends Component {
                             <h3 align="center" style={{margin: 0}}>{this.state.saving ? 'Сохранение данных...' : ''}</h3>
                         </Col>
                         <Col md={4}>
-                            <Button onClick={this.handleClose} bsStyle="danger" >Отмена</Button>
-                            <Button onClick={this.handleSubmit} bsStyle="success">Сохранить</Button>
+                            <Button onClick={this.handleClose} bsStyle="danger" disabled={this.state.saving} >Отмена</Button>
+                            <Button onClick={this.handleSubmit} bsStyle="success" disabled={this.state.saving}>Сохранить</Button>
                         </Col>
                     </Row>
                 </ModalFooter>
@@ -455,12 +500,20 @@ class EditDevWindow extends Component {
         )
     }
     async componentDidMount() {
-        window.openEditModal = ((id) => {
+        window.openEditModal = (id) => {
             this.setState({
                 show: true,
-                devId: id
+                devId: id,
+                devDataReady: false
             })
-        })(1506)
+        }
+        // window.openEditModal = ((id) => {
+        //     this.setState({
+        //         show: true,
+        //         devId: id,
+        //         devDataReady: false
+        //     })
+        // })(1418)
     }
 
     async componentDidUpdate() {
