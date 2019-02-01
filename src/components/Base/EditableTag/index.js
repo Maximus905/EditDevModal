@@ -9,18 +9,18 @@ class EditableTag extends PureComponent {
         value: ''
     }
 
-    contentEditable = React.createRef()
+    ref = React.createRef()
 
     formatValue = this.props.formatValue ? this.props.formatValue : (value) => value
 
     handleOnChange = (e) => {
+        if (this.state.value === e.target.value) return
         if (this.props.stateless) {
             this.invokeListeners({value: this.formatValue(e.target.value)})
         } else {
             this.setState({value: e.target.value})
         }
     }
-
 
     setDefaultValue = ((prevValue) => (value) => {
         if (this.props.stateless || value === undefined || value === null) return
@@ -46,14 +46,13 @@ class EditableTag extends PureComponent {
         }
     })(this.props.stateless ? this.props.value : this.state)
 
-    convertValueToHtml = (value) => {
-        return value === undefined || value === null ? '' : (value && value.toString ? value.toString() : '')
-    }
 
     render() {
-        const html = this.convertValueToHtml(this.props.stateless ? this.props.value : this.state.value)
+        const {value} = this.state
+        const html = value === undefined || value === null ? '' : (value.toString ? value.toString() : '')
         return (
-            <ContentEditable html={html} innerRef={this.contentEditable} onChange={this.handleOnChange} tagName={this.props.tagName} style={{'wordWrap': 'break-word'}} className={this.props.className} disabled={this.props.disabled} />
+
+            <ContentEditable html={html} innerRef={this.ref} onChange={this.handleOnChange} tagName={this.props.tagName} style={{'wordWrap': 'break-word'}} className={this.props.className} disabled={this.props.disabled} />
         )
     }
 

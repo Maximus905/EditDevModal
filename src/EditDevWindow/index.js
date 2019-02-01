@@ -21,8 +21,6 @@ import Ports from '../components/Ports'
 import DevLocation from '../components/DevLocation'
 import {DEV_DATA_URL, DEV_LOCATION_URL, DEV_MODULES_DATA_URL, DEV_PORTS_DATA_URL, DEV_SUBMIT_URL, VRF_LIST_URL} from'../constants'
 
-import ContentEditable from "react-contenteditable"
-
 class EditDevWindow extends Component {
     // constructor(props, context) {
     //     super(props, context);
@@ -309,7 +307,6 @@ class EditDevWindow extends Component {
     onChangeDevInfo = (key) => ({value}) => {
         const {devInfo} = this.currentState
         devInfo[key] = value
-        console.log(key, this.currentState)
     }
     onChangeDevDetails = (key) => ({value}) => {
         const {devInfo} = this.currentState
@@ -321,7 +318,6 @@ class EditDevWindow extends Component {
         if (modules[idx] && modules[idx][key] !== value) {
             modules[idx][key] = value
         }
-        console.log('MODULES', modules)
     }
     changeMngIpString = (ports) => {
         if (!check.array(ports)) return
@@ -443,47 +439,37 @@ class EditDevWindow extends Component {
                     <Modal.Title>Редактирование устройства</Modal.Title>
                 </ModalHeader>
                 <ModalBody className={custCss.modalBody} >
-                    {/*<table>*/}
-                        {/*<tbody>*/}
-                        {/*<tr>*/}
-                            {/*<ContentEditable tagName={"td"} html={'qwert'} onChange={(e) => console.log('edit', e.target.value)}/>*/}
-                            {/*<td>test</td>*/}
-                        {/*</tr>*/}
-                        {/*</tbody>*/}
-                    {/*</table>*/}
-
-
-                    {/*<Row>*/}
-                        {/*<Col md={2}><Region onChange={this.onChangeGeoLocation('region_id')} defaultSelected={geoLocation.region_id} disabled={!devDataReady}/></Col>*/}
-                        {/*<Col md={2}><City onChange={this.onChangeGeoLocation('city_id')} defaultSelected={geoLocation.city_id} filter={this.memoizedCityFilter()} disabled={!devDataReady}/></Col>*/}
-                        {/*<Col md={4}><Office onChange={this.onChangeGeoLocation('office_id')} defaultSelected={geoLocation.office_id} filter={this.memoizedOfficeFilter()} disabled={!devDataReady}/></Col>*/}
-                        {/*<Col md={4}><TextArea2 controlId="officeComment" disabled={this.state.officeDataInvalidate || !devDataReady} onChange={this.onChangeOfficeComment} placeholder='Комментарий к офису' value={this.state.officeComment} label="Комментарий к оффису" /></Col>*/}
-                    {/*</Row>*/}
-                    {/*<Row>*/}
-                        {/*<Col md={3}><DevType onChange={this.onChangeDevInfo('dev_type_id')} defaultSelected={devInfo.dev_type_id} /></Col>*/}
-                        {/*<Col md={3}><Platform onChange={this.onChangeDevInfo('platform_id')} defaultSelected={devInfo.platform_id}/></Col>*/}
-                        {/*<Col md={3}><Software onChange={this.onChangeDevInfo('software_id')}  defaultSelected={devInfo.software_id} /></Col>*/}
-                        {/*<Col md={3}><Input controlId='swVer' onChange={this.onChangeDevInfo('software_item_ver')} defaultValue={devInfo.software_item_ver} label="Версия ПО"/></Col>*/}
-                    {/*</Row>*/}
-                    {/*<Row>*/}
-                        {/*<Col md={3}><Input controlId='devSn' addOnPosition="left" addOnText="SN" onChange={this.onChangeDevInfo('platform_item_sn')} defaultValue={devInfo.platform_item_sn} label=" " readOnly/></Col>*/}
-                        {/*<Col md={3}><Input controlId='devAltSn' addOnPosition="left" addOnText="alt SN" onChange={this.onChangeDevInfo('platform_item_sn_alt')} defaultValue={devInfo.platform_item_sn_alt} label=" " /></Col>*/}
-                        {/*<Col md={3}><Input controlId='hostname' addOnPosition="left" addOnText="hostname" onChange={this.onChangeDevDetails('hostname')} defaultValue={devInfo.dev_details && devInfo.dev_details.hostname} label=" " /></Col>*/}
-                        {/*<Col md={3}><Input2 readOnly controlId='managementIP' addOnPosition="left" addOnText="management IP" onChange={()=>{}} label=" " value={this.state.mngIp} /></Col>*/}
-                    {/*</Row>*/}
-                    {/*<Row>*/}
-                        {/*<Col md={6}><TextArea controlId="deviceComment" onChange={this.onChangeDevInfo('dev_comment')} placeholder='Комментарий к устройству' defaultValue={devInfo.dev_comment} label="Коментарий к устройству" /></Col>*/}
-                    {/*</Row>*/}
-                    {/*<Row><Col md={6}><CheckBox title="Устройство используется" onChange={this.onChangeDevInfo('dev_in_use')} checked={devInfo.dev_in_use} >Устройство используется</CheckBox></Col></Row>*/}
+                    <Row>
+                        <Col md={2}><Region onChange={this.onChangeGeoLocation('region_id')} defaultSelected={geoLocation.region_id} disabled={!devDataReady}/></Col>
+                        <Col md={2}><City onChange={this.onChangeGeoLocation('city_id')} defaultSelected={geoLocation.city_id} filter={this.memoizedCityFilter()} disabled={!devDataReady}/></Col>
+                        <Col md={4}><Office onChange={this.onChangeGeoLocation('office_id')} defaultSelected={geoLocation.office_id} filter={this.memoizedOfficeFilter()} disabled={!devDataReady}/></Col>
+                        <Col md={4}><TextArea2 controlId="officeComment" disabled={this.state.officeDataInvalidate || !devDataReady} onChange={this.onChangeOfficeComment} placeholder='Комментарий к офису' value={this.state.officeComment} label="Комментарий к оффису" /></Col>
+                    </Row>
+                    <Row>
+                        <Col md={3}><DevType onChange={this.onChangeDevInfo('dev_type_id')} defaultSelected={devInfo.dev_type_id} /></Col>
+                        <Col md={3}><Platform onChange={this.onChangeDevInfo('platform_id')} defaultSelected={devInfo.platform_id}/></Col>
+                        <Col md={3}><Software onChange={this.onChangeDevInfo('software_id')}  defaultSelected={devInfo.software_id} /></Col>
+                        <Col md={3}><Input controlId='swVer' onChange={this.onChangeDevInfo('software_item_ver')} defaultValue={devInfo.software_item_ver} label="Версия ПО"/></Col>
+                    </Row>
+                    <Row>
+                        <Col md={3}><Input controlId='devSn' addOnPosition="left" addOnText="SN" onChange={this.onChangeDevInfo('platform_item_sn')} defaultValue={devInfo.platform_item_sn} label=" " readOnly/></Col>
+                        <Col md={3}><Input controlId='devAltSn' addOnPosition="left" addOnText="alt SN" onChange={this.onChangeDevInfo('platform_item_sn_alt')} defaultValue={devInfo.platform_item_sn_alt} label=" " /></Col>
+                        <Col md={3}><Input controlId='hostname' addOnPosition="left" addOnText="hostname" onChange={this.onChangeDevDetails('hostname')} defaultValue={devInfo.dev_details && devInfo.dev_details.hostname} label=" " /></Col>
+                        <Col md={3}><Input2 readOnly controlId='managementIP' addOnPosition="left" addOnText="management IP" onChange={()=>{}} label=" " value={this.state.mngIp} /></Col>
+                    </Row>
+                    <Row>
+                        <Col md={6}><TextArea controlId="deviceComment" onChange={this.onChangeDevInfo('dev_comment')} placeholder='Комментарий к устройству' defaultValue={devInfo.dev_comment} label="Коментарий к устройству" /></Col>
+                    </Row>
+                    <Row><Col md={6}><CheckBox title="Устройство используется" onChange={this.onChangeDevInfo('dev_in_use')} checked={devInfo.dev_in_use} >Устройство используется</CheckBox></Col></Row>
                     <Row>
                         <Col md={10}><Modules data={modules} onChange={this.onChangeModule} /></Col>
                     </Row>
-                    {/*<Ports data={ports} vrfData={this.vrfList} onChange={this.onChangePorts} />*/}
-                    {/*<Row>*/}
-                        {/*<Col md={10}>*/}
-                            {/*<DevLocation {...devSite} onChange={this.onChangeDevLocation} />*/}
-                        {/*</Col>*/}
-                    {/*</Row>*/}
+                    <Ports data={ports} vrfData={this.vrfList} onChange={this.onChangePorts} />
+                    <Row>
+                        <Col md={10}>
+                            <DevLocation {...devSite} onChange={this.onChangeDevLocation} />
+                        </Col>
+                    </Row>
                 </ModalBody>
                 <ModalFooter>
                     <Row>
@@ -507,13 +493,6 @@ class EditDevWindow extends Component {
                 devDataReady: false
             })
         }
-        // window.openEditModal = ((id) => {
-        //     this.setState({
-        //         show: true,
-        //         devId: id,
-        //         devDataReady: false
-        //     })
-        // })(1418)
     }
 
     async componentDidUpdate() {

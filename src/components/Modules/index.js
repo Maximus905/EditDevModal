@@ -5,9 +5,7 @@ import {Table} from 'react-bootstrap'
 import EditableTag from '../Base/EditableTag'
 import InUseButton from '../InUseButton'
 
-
 class Modules extends PureComponent {
-
     modulesSet = () => {
         const {data} = this.props
         if (check.not.array(data)) return
