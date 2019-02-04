@@ -123,7 +123,13 @@ class EditDevWindow extends Component {
       *     devId: (number|string),
       *     devDataLoading: boolean,
       *     devDataReady: boolean,
-       *     mngPorts: array
+      *     mngIp: string,
+      *     officeComment: string,
+      *     loadingOfficeData: boolean,
+      *     officeDataInvalidate: boolean,
+      *     saving: boolean,
+      *     region_id: string,
+      *     city_id: string,
       * }} state
       */
     state = {
@@ -131,7 +137,6 @@ class EditDevWindow extends Component {
         devId: '',
         devDataLoading: false,
         devDataReady: false,
-        mngPorts: [],
         mngIp: '',
         officeComment: '',
         loadingOfficeData: false,
@@ -348,10 +353,12 @@ class EditDevWindow extends Component {
     }
     changeMngIpString = (ports) => {
         if (!check.array(ports)) return
-        const res = ports.filter((port) => port.port_is_mng).map((port) => port.port_ip)
-        if (res.length > 0) {
-            this.setState({mngIp:res.join(', ') })
-        }
+        const res = ports.filter((port) => port.port_is_mng && !port.deleted).map((port) => port.port_ip)
+        let mngIp = res.join(', ')
+        if (this.state.mngIp !== mngIp) this.setState({mngIp})
+        // if (res.length > 0) {
+        //     this.setState({mngIp:res.join(', ') })
+        // }
     }
     onChangePorts = ({ports}) => {
         ports = ports.map((port) => {
@@ -527,6 +534,14 @@ class EditDevWindow extends Component {
                 show: true,
                 devId: id,
                 devDataReady: false
+            })
+        }
+        window.openCreateNewDevModal = () => {
+            this.setState({
+                show: true,
+                devId: '',
+                devDataReady: false,
+                newDev: true
             })
         }
     }
