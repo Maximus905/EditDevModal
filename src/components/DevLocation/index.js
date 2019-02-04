@@ -5,6 +5,11 @@ import EditableTag from "../Base/EditableTag"
 import Select from "../Base/Select"
 
 class DevLocation extends PureComponent {
+    pStyle = {
+        margin:0,
+        padding: '6px 3px'
+    }
+
     render() {
         const {onChange, floor, row, rack, unit, rackSide} = this.props
         const rackSideOptions = [{value: "Front", label: "Front"}, {value: "Back", label: "Back"}]
@@ -21,10 +26,10 @@ class DevLocation extends PureComponent {
                 </thead>
                 <tbody>
                     <tr>
-                        <EditableTag disabled={false} tagName='td' value={floor} onChange={onChange('floor')} />
-                        <EditableTag disabled={false} tagName='td' value={row} onChange={onChange('row')} />
-                        <EditableTag disabled={false} tagName='td' value={rack} onChange={onChange('rack')} />
-                        <EditableTag disabled={false} tagName='td' value={unit} onChange={onChange('unit')} />
+                        <td><EditableTag disabled={false} tagName='p' value={floor} onChange={onChange('floor')} style={this.pStyle} /></td>
+                        <td><EditableTag disabled={false} tagName='p' value={row} onChange={onChange('row')} style={this.pStyle} /></td>
+                        <td><EditableTag disabled={false} tagName='p' value={rack} onChange={onChange('rack')} style={this.pStyle} /></td>
+                        <td><EditableTag disabled={false} tagName='p' value={unit} onChange={onChange('unit')} style={this.pStyle} /></td>
                         <td><Select style={{marginBottom: 0}} isAsync={false} optionList={rackSideOptions} defaultSelected={rackSide} onChange={onChange('rackSide')} /></td>
                     </tr>
 

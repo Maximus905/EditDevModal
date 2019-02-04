@@ -50,9 +50,10 @@ class EditableTag extends PureComponent {
     render() {
         const {value} = this.state
         const html = value === undefined || value === null ? '' : (value.toString ? value.toString() : '')
+        const style = Object.assign({'wordWrap': 'break-word'}, this.props.style)
         return (
 
-            <ContentEditable html={html} innerRef={this.ref} onChange={this.handleOnChange} tagName={this.props.tagName} style={{'wordWrap': 'break-word'}} className={this.props.className} disabled={this.props.disabled} />
+            <ContentEditable html={html} innerRef={this.ref} onChange={this.handleOnChange} tagName={this.props.tagName} style={style} className={this.props.className} disabled={this.props.disabled} />
         )
     }
 
@@ -86,9 +87,7 @@ EditableTag.propTypes = {
         PropTypes.arrayOf(PropTypes.func)
     ]),
     className: PropTypes.string,
-    /** prepare value to render
-     * @return string
-     */
+    style: PropTypes.object,
 }
 EditableTag.defaultProps = {
     stateless: false,

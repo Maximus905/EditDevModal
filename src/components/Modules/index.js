@@ -16,7 +16,7 @@ class Modules extends PureComponent {
                     <td>{index + 1}</td>
                     <td className={module.module_item_not_found ? 'bg-danger' : null}>{module.module}</td>
                     <td>{module.module_item_sn}</td>
-                    <EditableTag disabled={false} tagName={'td'} value={module.module_item_comment} onChange={this.props.onChange('module_item_comment')(index)}/>
+                    <td><EditableTag disabled={false} tagName={'p'} value={module.module_item_comment} onChange={this.props.onChange('module_item_comment')(index)} style={{margin: 0}}/></td>
                     <td align="center" valign="middle">{button}</td>
                 </tr>
             )

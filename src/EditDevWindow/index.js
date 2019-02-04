@@ -1,4 +1,4 @@
-import React, {Component} from 'react'
+import React, {Fragment, Component} from 'react'
 import check from 'check-types'
 import custCss from './style.module.css'
 import axios from 'axios'
@@ -140,6 +140,9 @@ class EditDevWindow extends Component {
         region_id: '',
         city_id: '',
     }
+    clearState = ((initialState) => () => {
+        this.setState(cloneDeep(initialState))
+    })(this.state)
     /**
      * @type {{
      *    geoLocation: (GeoLocation|object),
@@ -154,6 +157,9 @@ class EditDevWindow extends Component {
         modules: [],
         ports: [],
     }
+    clearInitialData = ((initialState) => () => {
+        this.initialData = cloneDeep(initialState)
+    })(this.initialData)
 
     /**
      * @type {{
@@ -161,7 +167,6 @@ class EditDevWindow extends Component {
      *     devInfo: (DevInfo|object),
      *     modules: (Module[]|Array),
      *     ports: (Port[]|Array),
-     *     mngIp: string
      * }} currentState
      */
     currentState = {
@@ -169,8 +174,11 @@ class EditDevWindow extends Component {
         devInfo: {},
         modules: [],
         ports: [],
-
     }
+    clearCurrentState = ((initialState) => () => {
+        this.currentState = cloneDeep(initialState)
+    })(this.currentState)
+
     /**
      * @type Filter cityFilter
      */
@@ -179,6 +187,9 @@ class EditDevWindow extends Component {
         statement: '=',
         value: ''
     }
+    clearCityFilter = ((initialState) => () => {
+        this.cityFilter = cloneDeep(initialState)
+    })(this.cityFilter)
     /**
      * @type Filter officeFilter
      */
@@ -187,6 +198,9 @@ class EditDevWindow extends Component {
         statement: '=',
         value: ''
     }
+    clearOfficeFilter = ((initialState) => () => {
+        this.officeFilter = cloneDeep(initialState)
+    })(this.officeFilter)
     /**
      *
      * @type Site siteInfo
@@ -197,6 +211,18 @@ class EditDevWindow extends Component {
         rack: '',
         unit: '',
         rackSide: '',
+    }
+    clearSiteInfo = ((initialState) => () => {
+        this.siteInfo = cloneDeep(initialState)
+    })(this.siteInfo)
+
+    clearFormData = () => {
+        this.clearInitialData()
+        this.clearCurrentState()
+        this.clearOfficeFilter()
+        this.clearCityFilter()
+        this.clearSiteInfo()
+        this.clearState()
     }
     /**
      *
@@ -230,7 +256,8 @@ class EditDevWindow extends Component {
     }
 
     handleClose = () => {
-        this.setState({ show: false });
+        this.clearFormData()
+        // this.setState({ show: false });
     }
     dataValidate = (devData) => {
         const errors = []
@@ -239,7 +266,7 @@ class EditDevWindow extends Component {
     }
     handleSubmit = async() => {
         const errors = this.dataValidate(this.currentState)
-        console.log('save', this.currentState)
+        // console.log('save', this.currentState)
         if (check.nonEmptyArray(errors)) {
             alert(errors.join("\n"))
             return
@@ -426,19 +453,17 @@ class EditDevWindow extends Component {
     })([])
 
     render() {
-        const {geoLocation, devInfo, modules, ports} = this.initialData
         const {devDataReady} = this.state
+        const {geoLocation, devInfo, modules, ports} = this.initialData
         const devSite = (() => {
             const {floor, row, rack, unit, rackSide} = devInfo && devInfo.dev_details && devInfo.dev_details.site ? devInfo.dev_details.site : {}
             return {floor, row, rack, unit, rackSide}
         })()
-
-        return (
-            <Modal show={this.state.show} onHide={this.handleClose} bsSize="large" >
-                <ModalHeader closeButton>
-                    <Modal.Title>Редактирование устройства</Modal.Title>
-                </ModalHeader>
-                <ModalBody className={custCss.modalBody} >
+        const modalBody = () => {
+            if (!this.state.show) return null
+            if (!this.state.devDataReady) return <h3 align="center">Загрузка данных...</h3>
+            return (
+                <Fragment>
                     <Row>
                         <Col md={2}><Region onChange={this.onChangeGeoLocation('region_id')} defaultSelected={geoLocation.region_id} disabled={!devDataReady}/></Col>
                         <Col md={2}><City onChange={this.onChangeGeoLocation('city_id')} defaultSelected={geoLocation.city_id} filter={this.memoizedCityFilter()} disabled={!devDataReady}/></Col>
@@ -470,6 +495,17 @@ class EditDevWindow extends Component {
                             <DevLocation {...devSite} onChange={this.onChangeDevLocation} />
                         </Col>
                     </Row>
+                </Fragment>
+            )
+        }
+
+        return (
+            <Modal show={this.state.show} onHide={this.handleClose} bsSize="large" >
+                <ModalHeader closeButton>
+                    <Modal.Title>Редактирование устройства</Modal.Title>
+                </ModalHeader>
+                <ModalBody className={custCss.modalBody} >
+                    {modalBody()}
                 </ModalBody>
                 <ModalFooter>
                     <Row>

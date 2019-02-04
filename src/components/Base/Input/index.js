@@ -10,7 +10,7 @@ class Input extends PureComponent {
     }
 
     setDefaultValue = ((prevValue) => (value) => {
-        if (check.nonEmptyString(value) && prevValue !== value) {
+        if ((check.string(value) || check.number(value)) && prevValue !== value) {
             prevValue = value
             this.setState({value})
         }
