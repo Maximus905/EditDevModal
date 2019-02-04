@@ -97,10 +97,10 @@ class EditDevWindow extends Component {
       * }} Port
       *
       * @typedef {{
-      *     region_id: number,
-      *     city_id: number,
-      *     office_id: number
-      *     office_comment
+      *     region_id: (number|string),
+      *     city_id: (number|string),
+      *     office_id: (number|string)
+      *     office_comment: string
       * }} GeoLocation
       *
       * @typedef {{
@@ -121,6 +121,7 @@ class EditDevWindow extends Component {
       * @type {{
       *     show: boolean,
       *     devId: (number|string),
+      *     newDev: boolean,
       *     devDataLoading: boolean,
       *     devDataReady: boolean,
       *     mngIp: string,
@@ -134,6 +135,7 @@ class EditDevWindow extends Component {
       */
     state = {
         show: false,
+        newDev: false,
         devId: '',
         devDataLoading: false,
         devDataReady: false,
@@ -147,7 +149,7 @@ class EditDevWindow extends Component {
     }
     clearState = ((initialState) => () => {
         this.setState(cloneDeep(initialState))
-    })(this.state)
+    })(cloneDeep(this.state))
     /**
      * @type {{
      *    geoLocation: (GeoLocation|object),
@@ -164,7 +166,7 @@ class EditDevWindow extends Component {
     }
     clearInitialData = ((initialState) => () => {
         this.initialData = cloneDeep(initialState)
-    })(this.initialData)
+    })(cloneDeep(this.initialData))
 
     /**
      * @type {{
@@ -172,6 +174,7 @@ class EditDevWindow extends Component {
      *     devInfo: (DevInfo|object),
      *     modules: (Module[]|Array),
      *     ports: (Port[]|Array),
+     *     newDev: boolean
      * }} currentState
      */
     currentState = {
@@ -179,10 +182,23 @@ class EditDevWindow extends Component {
         devInfo: {},
         modules: [],
         ports: [],
+        newDev: false
     }
     clearCurrentState = ((initialState) => () => {
         this.currentState = cloneDeep(initialState)
-    })(this.currentState)
+    })(cloneDeep(this.currentState))
+
+    /**
+     *
+     * @return GeoLocation
+     */
+    emptyGeoLocation = () => {
+        return {
+        region_id: '',
+        city_id: '',
+        office_id: '',
+        office_comment: ''
+    }}
 
     /**
      * @type Filter cityFilter
@@ -194,7 +210,7 @@ class EditDevWindow extends Component {
     }
     clearCityFilter = ((initialState) => () => {
         this.cityFilter = cloneDeep(initialState)
-    })(this.cityFilter)
+    })(cloneDeep(this.cityFilter))
     /**
      * @type Filter officeFilter
      */
@@ -205,7 +221,7 @@ class EditDevWindow extends Component {
     }
     clearOfficeFilter = ((initialState) => () => {
         this.officeFilter = cloneDeep(initialState)
-    })(this.officeFilter)
+    })(cloneDeep(this.officeFilter))
     /**
      *
      * @type Site siteInfo
@@ -219,7 +235,8 @@ class EditDevWindow extends Component {
     }
     clearSiteInfo = ((initialState) => () => {
         this.siteInfo = cloneDeep(initialState)
-    })(this.siteInfo)
+    })(cloneDeep(this.siteInfo))
+
 
     clearFormData = () => {
         this.clearInitialData()
@@ -262,23 +279,21 @@ class EditDevWindow extends Component {
 
     handleClose = () => {
         this.clearFormData()
-        // this.setState({ show: false });
     }
     dataValidate = (devData) => {
         const errors = []
         if (check.not.number(devData.geoLocation.office_id)) errors.push('Не указан оффис')
+        if (check.not.number(devData.devInfo.dev_type_id)) errors.push('Не указан тип оборудования')
         return errors
     }
     handleSubmit = async() => {
         const errors = this.dataValidate(this.currentState)
-        // console.log('save', this.currentState)
         if (check.nonEmptyArray(errors)) {
             alert(errors.join("\n"))
             return
         }
         try {
             this.setState({saving: true})
-            // console.log('currentState', this.currentState)
             /**
              * @typedef {{
              *     code: number,
@@ -505,11 +520,11 @@ class EditDevWindow extends Component {
                 </Fragment>
             )
         }
-
+        const modalTitle = () => this.state.newDev ? 'Новое устройство' : 'Редактирование устройства'
         return (
             <Modal show={this.state.show} onHide={this.handleClose} bsSize="large" >
                 <ModalHeader closeButton>
-                    <Modal.Title>Редактирование устройства</Modal.Title>
+                    <Modal.Title>{modalTitle()}</Modal.Title>
                 </ModalHeader>
                 <ModalBody className={custCss.modalBody} >
                     {modalBody()}
@@ -533,22 +548,23 @@ class EditDevWindow extends Component {
             this.setState({
                 show: true,
                 devId: id,
+                newDev: false,
                 devDataReady: false
             })
         }
-        window.openCreateNewDevModal = () => {
+        window.openNewDevModal = () => {
             this.setState({
                 show: true,
                 devId: '',
-                devDataReady: false,
-                newDev: true
+                newDev: true,
+                devDataReady: false
             })
         }
     }
 
     async componentDidUpdate() {
-        const {devId, devDataReady, devDataLoading} = this.state
-        if (devId && !devDataReady && !devDataLoading) {
+        const {devId, newDev, devDataReady, devDataLoading} = this.state
+        if (! newDev && devId && !devDataReady && !devDataLoading) {
             this.setState({devDataLoading: true})
             // const devData = await this.fetchDeviceData(this.state.devId)
             try {
@@ -568,6 +584,7 @@ class EditDevWindow extends Component {
                 this.initialData = {...this.initialData, devInfo, modules, ports, geoLocation}
                 this.vrfList = vrfList
                 this.currentState = {
+                    ...this.currentState,
                     geoLocation: cloneDeep(geoLocation),
                     devInfo: cloneDeep(devInfo),
                     modules: cloneDeep(modules),
@@ -578,6 +595,15 @@ class EditDevWindow extends Component {
                 console.log('Loading dev data ERROR', e.toString())
             }
 
+        } else if (newDev && !devDataReady && !devDataLoading) {
+            this.setState({devDataLoading: true})
+            const response1 = await this.fetchVrfList()
+            const {vrfList} = response1
+            this.vrfList = vrfList
+            this.initialData.geoLocation = this.emptyGeoLocation()
+            this.currentState.geoLocation = this.emptyGeoLocation()
+            this.currentState.newDev = true
+            this.setState({devDataLoading: false, devDataReady: true})
         }
     }
 }

@@ -26,7 +26,6 @@ class Select extends PureComponent {
     })('')
 
     handleChange = (e) => {
-        console.log('type', typeof e.target.value)
         let value = parseInt(e.target.value)
         if (!isNaN(value) && value.toString && value.toString() === e.target.value) {
             this.setState({value})
